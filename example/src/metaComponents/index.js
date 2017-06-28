@@ -10,3 +10,9 @@ export function Input(props){
 	}
 	return <input {...props} onChange={handleChange} />
 }
+
+
+
+export function Button(props){
+	return <button {...props} /> 
+}

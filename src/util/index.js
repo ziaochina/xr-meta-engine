@@ -198,11 +198,13 @@ export function parseMeta(meta) {
     let parseChildren = (children, parentPath, parentRealPath) => {
         if (!children) return
         children.forEach((child, index) => {
-            let childName = child.get('name'),
-                path = `${parentPath}.${childName}`,
-                realPath = `${parentRealPath}.children.${index}`
-            ret = ret.set(path, realPath)
-            parseChildren(children.get('children'), path, realPath)
+            if(typeof child !='string'){
+                let childName = child.get('name'),
+                    path = `${parentPath}.${childName}`,
+                    realPath = `${parentRealPath}.children.${index}`
+                ret = ret.set(path, realPath)
+                parseChildren(children.get('children'), path, realPath)
+            }
         })
     }
     parseChildren(meta.get('children'), name, 'meta')

@@ -8,6 +8,10 @@ export function getMeta(){
         	title4:'bbb',
         	component:'Input',
         	bindField:'form.col'
+        },"ssss",{
+        	name:'button',
+        	component:'Button',
+        	children:'fewfewfewfewfew'
         }]
 
 	}

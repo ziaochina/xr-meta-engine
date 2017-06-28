@@ -37,6 +37,9 @@ class action {
 		if( !childrenMeta || childrenMeta.size == 0)
 			return 
 
+		if(typeof childrenMeta === 'string')
+			return
+
 		childrenMeta.map(child=>{
 			this.updateMeta(child, `${parentPath}.${child.name}`, rowIndex, vars)
 		})

@@ -2,6 +2,9 @@ import React from 'react'
 import componentFactory from './componentFactory'
 
 function getComponent(path, meta, props) {
+    if(typeof meta == 'string')
+        return meta
+
     const componentName = meta.component
 
     if (!componentName) {
@@ -10,7 +13,11 @@ function getComponent(path, meta, props) {
 
     const component = componentFactory.getComponent(props.appName, componentName)
 
-    const childrenProp = getChildrenProp(path, meta.children, props)
+    var childrenProp = meta.children 
+
+    if(typeof meta.children != 'string'){
+        childrenProp = getChildrenProp(path, meta.children, props)
+    }
 
     const allProps = {
         ...props, 
