@@ -27,7 +27,7 @@ function getComponent(path, meta, props) {
         key:path
     }
     
-    if(React.Component.isPrototypeOf(component)){
+    if(React.Component.isPrototypeOf(component) || component.__propo__.name == 'ReactComponent'){
         return React.createElement(component, allProps)
     }
     else{
