@@ -3,6 +3,8 @@ import React, {
 } from 'react'
 import ReactDOM from 'react-dom'
 
+import monkeyKing from './monkeyKing'
+
 
 export default function wrapper(option) {
 	return WrappedComponent => {
@@ -31,6 +33,7 @@ export default function wrapper(option) {
 				return (
 					<WrappedComponent
 						{...this.props}
+						monkeyKing={monkeyKing}
 					/>
 				)
 			}

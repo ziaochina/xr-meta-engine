@@ -4,12 +4,11 @@ class action {
 	constructor(option) {
 		this.appName = option.appInfo.name
 		this.event = option.event
-		this.realAction = option.exps
 
 		this.initView = this.initView.bind(this)
-		this.getterByField = this.getterByField.bind(this)
-		this.getter = this.getter.bind(this)
-		this.asyncGetter = this.asyncGetter.bind(this)
+		this.getField = this.getField.bind(this)
+		this.getMeta = this.getMeta.bind(this)
+		this.asyncGet = this.asyncGet.bind(this)
 		this.onEvent = this.onEvent.bind(this)
 		this.getDirectFuns = this.getDirectFuns.bind(this)
 	}
@@ -24,45 +23,53 @@ class action {
 		})
 	}
 
-	getterByField(fieldPath) {
-		return util.getterByField(this.injections.getState(), fieldPath)
+	getField(fieldPath) {
+		return util.getField(this.injections.getState(), fieldPath)
 	}
 
-	getter(path, propertys) {
-		var ret = util.getter(this.injections.getState(), path, propertys),
-			parsedPath = util.parsePath(path),
-			eventSource = (parsedPath || {
-				path: 'root'
-			}).path
+	getEventValue(path, property){
+		if (this.event && this.event[path] && this.event[path][property]) {
 
-		if (!propertys) {
-			return ret
 		}
-
-		if (typeof propertys === 'string') {
-			if (this.event && this.event[eventSource] && this.event[eventSource][propertys]) {
-				ret = this.event[eventSource][propertys]({
-					path: eventSource,
-					rowIndex: parsedPath.vars ? parsedPath.vars[0] : undefined
-				})
-			}
-			return ret
-		}
-
-		if (propertys.constructor === Array) {
-			for (let pt of propertys) {
-				if (this.event && this.event[eventSource] && this.event[eventSource][pt]) {
-					ret = ret.set(pt, this.event[eventSource][pt]({
-						path: eventSource,
-						rowIndex: parsedPath.vars ? parsedPath.vars[0] : undefined
-					}))
-				}
-			}
-		}
-		return ret
 	}
 
-	async asyncGetter(path, property) {
+	updateChildrenMeta(childrenMeta, parentPath, rowIndex, vars){
+		if( !childrenMeta || childrenMeta.size == 0)
+			return 
+
+		childrenMeta.map(child=>{
+			this.updateMeta(child, `${parentPath}.${child.name}`, rowIndex, vars)
+		})
+	}
+
+	updateMeta(meta, path, rowIndex, vars ){
+		Object.keys(meta).forEach(key => {
+			if (this.event && this.event[path] && this.event[path][key]) {
+				meta[key] = this.event[path][key]({path, rowIndex, vars})
+			}
+
+			if(key === 'children')
+				this.updateChildrenMeta(meta[key], path, rowIndex, vars)
+
+			if(key === 'bindField'){
+				meta.value = this.getField(meta[key]) 
+			}
+		})
+	}
+
+	getMeta(fullPath, propertys){
+		var meta = util.get(this.injections.getState(), fullPath, propertys),
+			parsedPath = util.parsePath(fullPath),
+			path = parsedPath.path,
+			rowIndex = parsedPath.vars ? parsedPath.vars[0] : undefined,
+			vars = parsedPath.vars
+
+		meta = meta.toJS()
+		this.updateMeta(meta, path, rowIndex, vars)
+		return meta
+	}
+
+	async asyncGet(path, property) {
 		var parsedPath = util.parsePath(path),
 			eventSource = (parsedPath || {
 				path: 'root'
@@ -101,23 +108,23 @@ class action {
 
 	getDirectFuns() {
 		return {
-			getter: (path, propertys) => {
-				return this.realAction.getter(path, propertys)
+			getMeta: (path, propertys) => {
+				return this.getMeta(path, propertys)
 			},
-			getterByField: (fieldPath) => {
-				return this.realAction.getterByField(fieldPath)
+			getField: (fieldPath) => {
+				return this.getField(fieldPath)
 			},
-			asyncGetter: async(path, propertys) => {
-				return await this.realAction.asyncGetter(path, property)
+			asyncGet: async(path, propertys) => {
+				return await this.asyncGet(path, property)
 			},
-			g:(path, propertys) => {
-				return this.realAction.getter(path, propertys)
+			gm:(path, propertys) => {
+				return this.getMeta(path, propertys)
 			},
 			gf:(fieldPath) => {
-				return this.realAction.getterByField(fieldPath)
+				return this.getField(fieldPath)
 			},
 			ag:async(path, propertys) => {
-				return await this.realAction.asyncGetter(path, property)
+				return await this.asyncGet(path, property)
 			}
 		}
 	}
@@ -126,12 +133,12 @@ class action {
 export default function actionCreator(option) {
 	const o = new action(option)
 	return {
-		g: o.getter,
-		gf: o.getterByField,
+		gm: o.getMeta,
+		gf: o.getField,
 		initView: o.initView,
-		getter: o.getter,
-		asyncGetter: o.asyncGetter,
-		getterByField: o.getterByField,
+		getMeta: o.getMeta,
+		asyncGet: o.asyncGet,
+		getField: o.getField,
 		onEvent: o.onEvent,
 		getDirectFuns: o.getDirectFuns
 	}

@@ -6,12 +6,14 @@ import {
 	reducer
 } from '../../src'
 
+import * as api from './api'
+
 import appInfo from './index.app'
 
 const _r = reducer(appInfo)
 
 export function init(state, option) {
-	const meta = {},
+	const meta = api.getMeta(),
 		data = {
 			form: {
 				col: '111'
