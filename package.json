@@ -1,10 +1,11 @@
 {
   "name": "xr-meta-engine",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "",
   "main": "./src/index.js",
   "scripts": {
     "compile": "babel -d lib/ src/",
+    "commit": "git add . && git commit -m 'zlj' &&  git push -u origin master",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
