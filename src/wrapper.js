@@ -27,9 +27,6 @@ export default function wrapper(option) {
 				if (!WrappedComponent)
 					return null
 
-				if(!this.props.payload || !this.props.payload.get('meta') || !this.props.payload.get('data'))
-					return null
-
 				return (
 					<WrappedComponent
 						{...this.props}
