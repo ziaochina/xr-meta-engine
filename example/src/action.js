@@ -4,16 +4,13 @@ import {
 
 import appInfo from './index.app'
 
-const event = {
-	'root': {
-		onInit: init
-	}
+const metaHandlers = {
+	onInit:init,
 }
 
 const _a = new action({
 	appInfo,
-	event,
-	exps: exports
+	metaHandlers
 })
 
 var _i

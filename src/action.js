@@ -1,9 +1,15 @@
 import * as util from './util'
+import {fromJS} from 'immutable'
 
 class action {
 	constructor(option) {
+		this.appInfo = option.appInfo
 		this.appName = option.appInfo.name
-		this.event = option.event
+		this.meta = fromJS(option.appInfo.meta)
+		this.metaMap = util.parseMeta(this.meta)
+		this.metaHandlers = option.metaHandlers
+
+		util.setMeta(option.appInfo)
 
 		this.initView = this.initView.bind(this)
 		this.getField = this.getField.bind(this)
@@ -17,20 +23,11 @@ class action {
 		this.component = component
 		this.injections = injections
 
-		this.event.root && this.event.root.onInit && this.event.root.onInit({
-			component,
-			injections
-		})
+		this.metaHandlers && this.metaHandlers['onInit'] && this.metaHandlers['onInit']({component, injections})
 	}
 
 	getField(fieldPath) {
 		return util.getField(this.injections.getState(), fieldPath)
-	}
-
-	getEventValue(path, property){
-		if (this.event && this.event[path] && this.event[path][property]) {
-
-		}
 	}
 
 	updateChildrenMeta(childrenMeta, parentPath, rowIndex, vars){
@@ -40,7 +37,6 @@ class action {
 		if(typeof childrenMeta === 'string')
 			return
 		
-
 		childrenMeta.map(child=>{
 			this.updateMeta(child, `${parentPath}.${child.name}`, rowIndex, vars)
 		})
@@ -48,8 +44,11 @@ class action {
 
 	updateMeta(meta, path, rowIndex, vars ){
 		Object.keys(meta).forEach(key => {
-			if (this.event && this.event[path] && this.event[path][key]) {
-				meta[key] = this.event[path][key]({path, rowIndex, vars})
+			if(typeof meta[key] == 'string' && meta[key].substring(0,2) === '$$'){
+				if(!this.metaHandlers || !this.metaHandlers[meta[key].substring(2)] )
+					throw `not found ${meta[key]} handler, please define in action`
+				
+				meta[key] = this.metaHandlers[meta[key].substring(2)]({path, rowIndex, vars})
 			}
 
 			if(key === 'children')
@@ -62,13 +61,12 @@ class action {
 	}
 
 	getMeta(fullPath, propertys){
-		var meta = util.get(this.injections.getState(), fullPath, propertys),
+		const meta = util.getMeta(this.appInfo, fullPath, propertys),
 			parsedPath = util.parsePath(fullPath),
 			path = parsedPath.path,
 			rowIndex = parsedPath.vars ? parsedPath.vars[0] : undefined,
 			vars = parsedPath.vars
 
-		meta = meta.toJS()
 		this.updateMeta(meta, path, rowIndex, vars)
 		return meta
 	}
@@ -92,23 +90,25 @@ class action {
 		}
 	}
 
-
 	onEvent(eventName, option) {
 		var parsedPath = _a.parsePath(option.path),
 			eventSource = (parsedPath || {
 				path: 'root'
 			}).path
 
-		if (this.event && this.event[eventSource] && this.event[eventSource][eventName]) {
-			this.event[eventSource][eventName]({
+		const strHandler = util.getMeta(this.appInfo, eventSource, eventName)
+		if(strHandler && strHandler.substring(0,2) === '$$' && this.metaHandlers[strHandler.substr(2)]){
+			this.metaHandlers[strHandler.substr(2)]({
 				...option,
 				path: eventSource,
 				rowIndex: parsedPath.vars ? parsedPath.vars[0] : option.rowIndex
 			})
-		} else {
+		}
+		else {
 			this.injections.reduce('onEvent', eventName, option)
 		}
 	}
+
 
 	getDirectFuns() {
 		return {

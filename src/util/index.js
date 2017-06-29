@@ -1,6 +1,7 @@
 import {
     Map,
-    List
+    List,
+    fromJS
 } from 'immutable'
 
 import {
@@ -10,156 +11,56 @@ import {
     match
 } from './path'
 
+const cache = { meta:Map()}
 
+export function getMeta(appInfo, fullpath, propertys){
 
-export function get(state, path, propertys) {
-    if (propertys === 'focusField')
-        return state.getIn(['meta_runtime', 'focusField'])
+    if (!fullpath)
+        return cache.meta.getIn([appInfo.name,'meta']).toJS()
 
-    if (!path)
-        return undefined
-
-    var parsedPath = parsePath(path),
+    const parsedPath = parsePath(fullpath),
         vars = parsedPath.vars,
-        sourcePath = path,
-        meta, value, bindField
+        metaMap = cache.meta.getIn([appInfo.name,'metaMap']),
+        meta = cache.meta.getIn([appInfo.name,'meta'])
 
-    path = state.getIn(['parsedMeta', parsedPath.path])
+    const path = metaMap.get(parsedPath.path)
 
-    const getMeta = () => {
-        if (meta) {
-            return meta
-        }
+    const currentMeta = path ? meta.getIn(path.split('.')) : meta
 
-        meta = state.getIn(path.split('.'))
-        bindField = meta.get('bindField')
-        if (vars) {
-            bindField = calcBindField(bindField, parsedPath)
-            meta = meta.merge(state.getIn((`data.${bindField}_runtime`).split('.')))
-        }
-        return meta
-    }
+    if(!propertys)
+        return currentMeta.toJS()
 
-    const getBindField = () => {
-        if (bindField)
-            return bindField
-        getMeta(path)
-        return bindField
-    }
+    const ret = {}
 
-    const getPropertyValue = (property) => {
-        if (!property)
-            return getMeta()
-
-        if (property === 'isFocus')
-            return state.getIn(['other', 'focusField']) === sourcePath
-
-
-        if (property === 'bindField')
-            return getBindField()
-
-        if (property === 'value') {
-            return state.getIn((`data.${getBindField()}`).split('.'))
-        }
-
-        return getMeta().getIn(property.split('.'))
-    }
-
-
-    var ret = undefined
     if (propertys instanceof Array) {
-        ret = Map()
         propertys.forEach(p => {
-            ret = ret.set(p, getPropertyValue(p))
+            let val = currentMeta.getIn(p.split('.'))
+            ret[p] = val.toJS ? val.toJS() : val
         })
 
     } else {
-        ret = getPropertyValue(propertys)
+        let val = currentMeta.getIn(propertys.split('.'))
+        ret[propertys] = val.toJS ? val.toJS() : val
     }
-
 
     return ret
 }
 
+export function setMeta(appInfo) {
 
-export function setMetaProperty(meta, propertyPath, value) {
-    if (!meta || !propertyPath) return meta
+    if(!appInfo || !appInfo.meta) return
 
-    let pathSegments = propertyPath.split('.'),
-        property, current
+    const appName = appInfo.name
 
-    pathSegments.every((p, index) => {
-        if (index == 0 && meta.name != p)
-            return false
+    if( cache.meta.has(appName) )
+        return
 
-        if (index == 0) {
-            current = meta
-            return true
-        }
+    const meta = fromJS(appInfo.meta)
 
-        if (index == pathSegments.length - 1) {
-            current[p] = value
-            return false
-        }
-
-        if (!current.childrens || current.childrens.length == 0)
-            return false
-
-        return !current.childrens.every((c, index) => {
-            if (c.name == p) {
-                current = c
-                return false
-            }
-            return true
-        })
-
-    })
-
-    return meta
+    cache.meta = cache.meta
+        .setIn([appName,'meta'], meta)
+        .setIn([appName, 'metaMap'], parseMeta(meta))
 }
-
-
-export function set(state, path, property, value) {
-    if (!path || !property)
-        return state
-
-    if (property === 'focusField') {
-        value = value || ''
-        state = state.setIn(['other', 'oldFocusField'], state.getIn(['other', 'focusField']))
-        return state.setIn(['other', 'focusField'], value)
-    }
-
-    let parsedPath = parsePath(path),
-        bindField
-    path = state.getIn(['parsedMeta', parsedPath.path])
-
-    if (property === 'value') {
-        bindField = state.getIn((`${path}.bindField`).split('.'))
-        bindField = calcBindField(bindField, parsedPath)
-        state = state.setIn((`data.${bindField}`).split('.'), value)
-        return state
-    }
-
-    if (!parsedPath.vars) {
-        return state.setIn((`${path}.${property}`).split('.'), value)
-    }
-
-    bindField = state.getIn((`${path}.bindField`).split('.'))
-    bindField = calcBindField(bindField, parsedPath)
-    return state.setIn((`data.${bindField}_runtime.${property}`).split('.'), value)
-}
-
-
-export function update(state, path, property, fn) {
-    if (property !== 'value') return
-    let parsedPath = parsePath(path),
-        bindField
-    path = state.getIn(['parsedMeta', parsedPath.path])
-    bindField = state.getIn((`${path}.bindField`).split('.'))
-    bindField = calcBindField(bindField, parsedPath)
-    return state.updateIn((`data.${bindField}`).split('.'), fn)
-}
-
 
 export function getField(state, fieldPath) {
     if (!fieldPath) {
@@ -193,7 +94,7 @@ export function parseMeta(meta) {
     let ret = Map(),
         name = meta.get('name')
 
-    ret = ret.set(name, 'meta')
+    ret = ret.set(name, '')
 
     let parseChildren = (children, parentPath, parentRealPath) => {
         if (!children) return
@@ -207,7 +108,7 @@ export function parseMeta(meta) {
             }
         })
     }
-    parseChildren(meta.get('children'), name, 'meta')
+    parseChildren(meta.get('children'), name, '')
     return ret
 }
 
