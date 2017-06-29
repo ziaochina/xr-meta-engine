@@ -8,19 +8,16 @@ import * as util from './util'
 class reducer {
 	init(state, option){
 		const {
-			meta = {},
 			data = {},
 		} = option
 
 		return this.initByImmutable(state, {
-			meta: Immutable.fromJS(meta),
 			data: Immutable.fromJS(data),
 		})
 	}
 
 	initByImmutable(state, option) {
 		const {
-			meta,
 			data,
 		} = option
 
@@ -37,9 +34,7 @@ class reducer {
 
 		//设置状态
 		return state
-			.set('meta', meta)
 			.set('data', data)
-			.set('parsedMeta', util.parseMeta(meta))
 	}
 
 	onEvent(eventName, option) {
