@@ -3,6 +3,7 @@ import componentFactory from './componentFactory'
 import omit from 'omit.js'
 
 function getComponent(path, meta, props) {
+    debugger
     if(typeof meta == 'string')
         return meta
 
