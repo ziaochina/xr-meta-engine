@@ -1,5 +1,6 @@
 import React from 'react'
 import componentFactory from './componentFactory'
+import omit from 'omit.js'
 
 function getComponent(path, meta, props) {
     if(typeof meta == 'string')
@@ -19,13 +20,15 @@ function getComponent(path, meta, props) {
         childrenProp = getChildrenProp(path, meta.children, props)
     }
 
-    const allProps = {
+    var allProps = {
         ...props, 
         ...meta,
         children:childrenProp,
         path:path,
         key:path
     }
+
+    allProps = omit(allProps, ['clearAppState', 'component', 'name', 'getDirectFuns', 'initView', 'payload'])
     
     if(component.prototype.isReactComponent){
         return React.createElement(component, allProps)

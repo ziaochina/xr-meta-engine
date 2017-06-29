@@ -1,6 +1,6 @@
 {
   "name": "xr-meta-engine",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "description": "",
   "main": "./lib/index.js",
   "scripts": {
@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/ziaochina/xr-meta-engine#readme",
   "dependencies": {
+    "omit.js": "^0.1.0",
     "xr-app-loader": "^1.0.19"
   },
   "devDependencies": {
