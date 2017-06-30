@@ -35,7 +35,7 @@ class componentFactory {
         if (this.appComponents && this.appComponents[appName] && this.appComponents[appName].components && this.appComponents[appName].components[firstSeg]){
             var com = this.appComponents[appName].components[name]
 
-            if(nameSegs.length > 1){
+            if(com && nameSegs.length > 1){
                 com = this.findChild(com, nameSegs)
             }
             
@@ -45,7 +45,7 @@ class componentFactory {
 
         var component = this.components[name]
 
-        if(nameSegs.length > 1){
+        if(component && nameSegs.length > 1){
             component = this.findChild(component, nameSegs)
         }
 
