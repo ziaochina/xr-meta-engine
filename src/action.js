@@ -135,7 +135,7 @@ class action {
 	}
 }
 
-export default function actionCreator(option) {
+export default function creator(option) {
 	const o = new action(option)
 	return {
 		gm: o.getMeta,

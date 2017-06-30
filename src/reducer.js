@@ -6,6 +6,7 @@ import Immutable, {
 import * as util from './util'
 
 class reducer {
+	cons
 	init(state, option){
 		this.appInfo = option.appInfo
 
@@ -62,8 +63,8 @@ class reducer {
 }
 
 
-export default function actionCreator() {
-	const o = new reducer()
+export default function creator(option) {
+	const o = new reducer(option)
 	return {
 		init: o.init,
 		initByImmutable: o.initByImmutable,
