@@ -48,7 +48,7 @@ class action {
 				if(!this.metaHandlers || !this.metaHandlers[meta[key].substring(2)] )
 					throw `not found ${meta[key]} handler, please define in action`
 				
-				meta[key] = this.metaHandlers[meta[key].substring(2)]({path, rowIndex, vars})
+				meta[key] = ()=> this.metaHandlers[meta[key].substring(2)]({path, rowIndex, vars})
 			}
 
 			if(key === 'children')
