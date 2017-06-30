@@ -8,8 +8,9 @@ import * as util from './util'
 class reducer {
 	constructor(option) {
 		this.appInfo = option.appInfo
+		this.onEvent = this.onEvent.bind(this)
 	}
-	
+
 	init(state, option){
 		const {
 			data = {},
