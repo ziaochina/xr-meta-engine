@@ -35,29 +35,38 @@ class componentFactory {
         if (this.appComponents && this.appComponents[appName] && this.appComponents[appName].components && this.appComponents[appName].components[firstSeg]){
             var com = this.appComponents[appName].components[name]
 
-            if(nameSegs.length == 1)            
-                return com
-            
-
-            for(let s of nameSegs.slice(1)){
-                if(!com[s]){
-                    com = undefined
-                    return 
-                }
-
-                com = com[s]
+            if(nameSegs.length > 1){
+                com = findChild(com, nameSegs)
             }
-
+            
             if(com) return com
+            
         }
 
         var component = this.components[name]
+
+        if(nameSegs.length > 1){
+            component = findChild(component, nameSegs)
+        }
 
         if (!component) {
             throw `没有组件. name: ${name}`
         }
 
         return component
+    }
+
+    findChild(component, nameSegs){
+        for(let s of nameSegs.slice(1)){
+            if(!component[s]){
+                component = undefined
+                return 
+            }
+
+            component = component[s]
+        }
+        return component
+
     }
 
 
