@@ -46,7 +46,7 @@ class reducer {
 			case 'onFieldFocus':
 				return focus(state, path)
 			case 'onFieldChange':
-				return util.setter(state, path, 'value', option.value)
+				return util.setField(state, path, 'value', option.value)
 			default:
 				return state
 		}
@@ -64,12 +64,12 @@ export default function actionCreator() {
 	return {
 		init: o.init,
 		initByImmutable: o.initByImmutable,
-		getMeta: util.get,
+		getMeta: util.getMeta,
 		getField: util.getField,
-		setMeta: util.set,
+		setMeta: util.setMeta,
 		setField: util.setField,
 		onEvent: o.onEvent,
-		gm:util.get,
+		gm:util.getMeta,
 		gf:util.getField,
 		sm:util.setMeta,
 		sf:util.setField
