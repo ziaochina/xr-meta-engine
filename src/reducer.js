@@ -7,6 +7,8 @@ import * as util from './util'
 
 class reducer {
 	init(state, option){
+		this.appInfo = option.appInfo
+
 		const {
 			data = {},
 		} = option
@@ -38,14 +40,15 @@ class reducer {
 	}
 
 	onEvent(state, eventName, option) {
-		const {
-			path
-		} = option
+		const { path } = option
+		
+		const fieldPath  = util.getMeta(this.appInfo, path, 'bindField')
 
 		switch (eventName) {
 			case 'onFieldFocus':
 				return focus(state, path)
 			case 'onFieldChange':
+
 				return util.setField(state, path, 'value', option.value)
 			default:
 				return state

@@ -35,7 +35,13 @@ export function getMeta(appInfo, fullpath, propertys){
     if (propertys instanceof Array) {
         propertys.forEach(p => {
             let val = currentMeta.getIn(p.split('.'))
-            ret[p] = (val && val.toJS) ? val.toJS() : val
+            if(p == 'bindField'){
+                ret[p] = calcBindField(val, parsedPath)
+            }
+            else{
+                ret[p] = (val && val.toJS) ? val.toJS() : val    
+            }
+            
         })
 
         return ret
@@ -43,6 +49,9 @@ export function getMeta(appInfo, fullpath, propertys){
 
     if( typeof propertys == 'string') {
         let val = currentMeta.getIn(propertys.split('.'))
+        if(propertys == 'bindField'){
+            return calcBindField(val, parsedPath)
+        }
         return (val && val.toJS) ? val.toJS() : val
     }
 

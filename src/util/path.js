@@ -36,11 +36,17 @@ export function parsePath(path) {
  * @return {[type]}            [计算出的绑定字段路径]
  */
 export function calcBindField(bindField, parsedPath) {
-    let vars = parsedPath.vars
-    if (!vars)
-        return bindField
-    let hit = false
-    bindField = bindField.replace(/{(\d+)}/g, function(match, index) {
+    if(!bindField) return bindField
+
+    if(!parsedPath || !parsedPath.vars) return bindField
+
+    const vars = parsedPath.vars
+
+    var hit = false
+
+    //root.detail.code,0;form.detail.${0}.code => form.detail.0.code
+    //root.detail,0;form.detail => form.detail.0
+    bindField = bindField.replace(/{(\d+)}/g, (match, index)=> {
         hit = true
         return vars[index]
     })
