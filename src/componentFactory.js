@@ -36,7 +36,7 @@ class componentFactory {
             var com = this.appComponents[appName].components[name]
 
             if(nameSegs.length > 1){
-                com = findChild(com, nameSegs)
+                com = this.findChild(com, nameSegs)
             }
             
             if(com) return com
@@ -46,7 +46,7 @@ class componentFactory {
         var component = this.components[name]
 
         if(nameSegs.length > 1){
-            component = findChild(component, nameSegs)
+            component = this.findChild(component, nameSegs)
         }
 
         if (!component) {
