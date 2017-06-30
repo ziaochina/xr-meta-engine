@@ -26,8 +26,30 @@ class componentFactory {
     }
 
     getComponent(appName, name) {
-        if (this.appComponents && this.appComponents[appName] && this.appComponents[appName].components && this.appComponents[appName].components[name])
-            return this.appComponents[appName].components[name]
+        if(!name)
+            throw 'component name can not null'
+
+        const nameSegs = name.split('.'),
+            firstSeg = nameSegs[0]
+
+        if (this.appComponents && this.appComponents[appName] && this.appComponents[appName].components && this.appComponents[appName].components[firstSeg]){
+            var com = this.appComponents[appName].components[name]
+
+            if(nameSegs.length == 1)            
+                return com
+            
+
+            for(let s of nameSegs.slice(1)){
+                if(!com[s]){
+                    com = undefined
+                    return 
+                }
+
+                com = com[s]
+            }
+
+            if(com) return com
+        }
 
         var component = this.components[name]
 
@@ -37,6 +59,8 @@ class componentFactory {
 
         return component
     }
+
+
 }
 
 const instance = new componentFactory()
