@@ -92,7 +92,7 @@ class action {
 	}
 
 	onEvent(eventName, option) {
-		var parsedPath = _a.parsePath(option.path),
+		var parsedPath = util.parsePath(option.path),
 			eventSource = (parsedPath || {
 				path: 'root'
 			}).path
