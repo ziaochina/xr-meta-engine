@@ -37,7 +37,7 @@ class reducer {
 			.set('data', data)
 	}
 
-	onEvent(eventName, option) {
+	onEvent(state, eventName, option) {
 		const {
 			path
 		} = option
