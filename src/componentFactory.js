@@ -43,7 +43,7 @@ class componentFactory {
             
         }
 
-        var component = this.components[name]
+        var component = this.components[firstSeg]
 
         if(component && nameSegs.length > 1){
             component = this.findChild(component, nameSegs)
