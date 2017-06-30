@@ -38,12 +38,14 @@ export function getMeta(appInfo, fullpath, propertys){
             ret[p] = (val && val.toJS) ? val.toJS() : val
         })
 
-    } else {
+        return ret
+    } 
+
+    if( typeof propertys == 'string') {
         let val = currentMeta.getIn(propertys.split('.'))
-        ret[propertys] = (val && val.toJS) ? val.toJS() : val
+        return (val && val.toJS) ? val.toJS() : val
     }
 
-    return ret
 }
 
 export function setMeta(appInfo) {
