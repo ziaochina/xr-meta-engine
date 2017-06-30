@@ -6,10 +6,11 @@ import Immutable, {
 import * as util from './util'
 
 class reducer {
-	cons
-	init(state, option){
+	constructor(option) {
 		this.appInfo = option.appInfo
-
+	}
+	
+	init(state, option){
 		const {
 			data = {},
 		} = option
