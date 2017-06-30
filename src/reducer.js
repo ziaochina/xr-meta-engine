@@ -51,8 +51,7 @@ class reducer {
 			case 'onFieldFocus':
 				return focus(state, path)
 			case 'onFieldChange':
-
-				return util.setField(state, path, 'value', option.value)
+				return util.setField(state, fieldPath, 'value', option.value)
 			default:
 				return state
 		}
