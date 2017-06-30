@@ -98,11 +98,12 @@ export function parseMeta(meta) {
 
     let parseChildren = (children, parentPath, parentRealPath) => {
         if (!children) return
+        parentRealPath = parentRealPath? `${parentRealPath}.` : parentRealPath
         children.forEach((child, index) => {
             if(typeof child !='string'){
                 let childName = child.get('name'),
                     path = `${parentPath}.${childName}`,
-                    realPath = `${parentRealPath}.children.${index}`
+                    realPath = `${parentRealPath}children.${index}`
                 ret = ret.set(path, realPath)
                 parseChildren(children.get('children'), path, realPath)
             }
