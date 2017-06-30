@@ -35,12 +35,12 @@ export function getMeta(appInfo, fullpath, propertys){
     if (propertys instanceof Array) {
         propertys.forEach(p => {
             let val = currentMeta.getIn(p.split('.'))
-            ret[p] = val.toJS ? val.toJS() : val
+            ret[p] = (val && val.toJS) ? val.toJS() : val
         })
 
     } else {
         let val = currentMeta.getIn(propertys.split('.'))
-        ret[propertys] = val.toJS ? val.toJS() : val
+        ret[propertys] = (val && val.toJS) ? val.toJS() : val
     }
 
     return ret
