@@ -29,6 +29,10 @@ class componentFactory {
         if(!name)
             throw 'component name can not null'
 
+        if(name.substring(0,1) == '_'){
+            return name.substr(1)
+        }
+
         const nameSegs = name.split('.'),
             firstSeg = nameSegs[0]
 
