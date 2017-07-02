@@ -31,7 +31,7 @@ function getComponent(path, meta, props) {
 
     allProps = omit(allProps, ['clearAppState', 'component', 'name', 'getDirectFuns', 'initView', 'payload'])
     
-    if(component.prototype.isReactComponent){
+    if(typeof component == 'string' || component.prototype.isReactComponent){
         return React.createElement(component, allProps)
     }
     else{
