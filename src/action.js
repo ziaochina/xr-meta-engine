@@ -30,6 +30,10 @@ class action {
 		return util.getField(this.injections.getState(), fieldPath)
 	}
 
+	setField(fieldPath, value){
+		return this.injections.reduce('setField', fieldPath, value)
+	}
+
 	updateChildrenMeta(childrenMeta, parentPath, rowIndex, vars){
 		if( !childrenMeta || childrenMeta.size == 0)
 			return 
@@ -44,6 +48,7 @@ class action {
 
 	updateMeta(meta, path, rowIndex, vars ){
 		Object.keys(meta).forEach(key => {
+			//$$getVisible
 			if(typeof meta[key] == 'string' && meta[key].substring(0,2) === '$$'){
 				if(!this.metaHandlers || !this.metaHandlers[meta[key].substring(2)] )
 					throw `not found ${meta[key]} handler, please define in action`
@@ -52,6 +57,23 @@ class action {
 				meta[key] = ()=> this.metaHandlers[handlerName]({path, rowIndex, vars})
 			}
 
+			//##form.code
+			if(typeof meta[key] == 'string' && meta[key].substring(0,2) === '##'){
+				meta[key] = this.getField(calcBindField(meta[key].substr(2), vars))
+			}
+
+			//args[0].target.value->form.code
+			if(typeof meta[key] == 'string' && meta[key].indexOf('->') !== -1){
+				const tmp = meta[key].replace('->', ';').split(';')
+				const f = new Function('args', 'fieldPath', 'valueExpress', 'setField', `setField(fieldPath, valueExpress)`)
+				meta[key] = (...args)=> f(args, this.calcBindField(tmp[1], vars), tmp[0], this.setField)
+			}
+
+			if(typeof meta[key] == 'object' && meta[key].component){
+				updateMeta(meta[key], parent + '.' + key, rowIndex, vars)
+			}
+
+
 			if(key === 'children')
 				this.updateChildrenMeta(meta[key], path, rowIndex, vars)
 
@@ -59,6 +81,22 @@ class action {
 				meta.value = this.getField(meta[key]) 
 			}
 		})
+	}
+
+	calcBindField(bindField, vars) {
+	    if(!bindField) return bindField
+
+	    if(!vars) return bindField
+
+	    var hit = false
+
+	    //root.detail.code,0;form.detail.${0}.code => form.detail.0.code
+	    //root.detail,0;form.detail => form.detail.0
+	    bindField = bindField.replace(/{(\d+)}/g, (match, index)=> {
+	        hit = true
+	        return vars[index]
+	    })
+	    return hit ? bindField : bindField + '.' + vars[0]
 	}
 
 	getMeta(fullPath, propertys){
@@ -133,18 +171,21 @@ class action {
 			}
 		}
 	}
+
+	getPublishMethods(){
+		return {
+			initView:this.initView,
+			getMeta:this.getMeta,
+			asyncGet:this.asyncGet,
+			getField:this.getField,
+			onEvent:this.onEvent,
+			getDirectFuns:this.getDirectFuns,
+			gm:this.getMeta,
+			gf:this.getField
+		}
+	}
 }
 
 export default function creator(option) {
-	const o = new action(option)
-	return {
-		gm: o.getMeta,
-		gf: o.getField,
-		initView: o.initView,
-		getMeta: o.getMeta,
-		asyncGet: o.asyncGet,
-		getField: o.getField,
-		onEvent: o.onEvent,
-		getDirectFuns: o.getDirectFuns
-	}
+	return new action(option).getPublishMethods()
 }

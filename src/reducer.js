@@ -61,22 +61,23 @@ class reducer {
 		return util.setter(state, 'meta', 'focusField', path)
 	}
 
+	getPublishMethods(){
+		return {
+			init:this.init,
+			initByImmutable:this.initByImmutable,
+			onEvent:this.onEvent,
+			getMeta:util.getMeta,
+			getField:util.getField,
+			setField:util.setField,
+			gm:util.getMeta,
+			gf:util.getField,
+			sf:util.setField
+		}
+	}
+
 }
 
 
 export default function creator(option) {
-	const o = new reducer(option)
-	return {
-		init: o.init,
-		initByImmutable: o.initByImmutable,
-		getMeta: util.getMeta,
-		getField: util.getField,
-		setMeta: util.setMeta,
-		setField: util.setField,
-		onEvent: o.onEvent,
-		gm:util.getMeta,
-		gf:util.getField,
-		sm:util.setMeta,
-		sf:util.setField
-	}
+	return new reducer(option).getPublishMethods()
 }

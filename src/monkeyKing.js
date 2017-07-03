@@ -39,6 +39,7 @@ function getComponent(path, meta, props) {
     }
 }
 
+
 function getChildrenProp(parentPath, childrenMeta, props){
     if(!childrenMeta || childrenMeta.length == 0)    
         return

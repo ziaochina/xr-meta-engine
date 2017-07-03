@@ -1,28 +1,40 @@
 import {
-	action
+	action as baseAction
 } from '../../src'
 
 import appInfo from './index.app'
 
-const metaHandlers = {
-	onInit:init,
+class action {
+	constructor(option){
+		this.appInfo = option.appInfo
+		this.init = this.init.bind(this)
+		this.getMetaHanders = this.getMetaHanders.bind(this)
+		this.baseAction = new baseAction({appInfo:this.appInfo, metaHandlers:this.getMetaHanders()})
+	}
+
+	init({component, injections}){
+		this.component = component
+		this.injections = injections
+	}
+	
+	getMetaHanders(){
+		return {
+			init:this.init
+		}
+	}
+
+	getReferenceAction(){
+		return {
+			...this.baseAction
+		}
+	}
+
 }
 
-const _a = new action({
-	appInfo,
-	metaHandlers
-})
-
-var _i
-
-function init({
-	component,
-	injections
-}) {
-	_i = injections
-	_i.reduce('init')
+export default creator(option){
+	const o = new action(option)
+	return {
+		...o.getReferenceAction(),
+		...o
+	}
 }
-
-Object.assign(exports, {..._a,
-	...exports
-})

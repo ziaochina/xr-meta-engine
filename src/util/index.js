@@ -11,7 +11,76 @@ import {
     match
 } from './path'
 
+
 const cache = { meta:Map()}
+
+export function setMeta(appInfo) {
+
+    if(!appInfo || !appInfo.meta) return
+
+    const appName = appInfo.name
+
+    if( cache.meta.has(appName) )
+        return
+
+    const meta = fromJS(appInfo.meta)
+
+    cache.meta = cache.meta
+        .setIn([appName,'meta'], meta)
+        .setIn([appName, 'metaMap'], parseMeta(meta))
+}
+
+export function parseMeta(meta) {
+    let ret = Map(),
+        name = meta.get('name')
+
+    ret = ret.set(name, '')
+
+    const parseChildren = (children, parentPath, parentRealPath) => {
+        if (!children) return
+        parentRealPath = parentRealPath? `${parentRealPath}.` : parentRealPath
+        children.forEach((child, index) => {
+            if(typeof child !='string'){
+                let childName = child.get('name'),
+                    path = `${parentPath}.${childName}`,
+                    realPath = `${parentRealPath}children.${index}`
+                ret = ret.set(path, realPath)
+                parseChildren(children.get('children'), path, realPath)
+            }
+        })
+    }
+
+
+    const parseProp = (propValue, parentPath, parentRealPath) =>{
+        if(isComponent(propValue)){
+           
+            ret = ret.set(parentPath, parentRealPath)
+
+            for(let p in propValue){
+                if(p != 'children' && p != 'name' && p != 'component'){
+                    parseProp(propValue[p], `${parentPath}.#${p}`, `${parentRealPath}.${p}`)
+                }
+            }
+        }
+    }
+
+    for(let p in meta){
+        if(p != 'children' && p != 'name' && p != 'component'){
+            parseProp(meta[p], `${name}.#${p}`, `${name}.${p}`)
+        }
+    }
+
+    parseChildren(meta.get('children'), name, '')
+    return ret
+}
+
+
+
+function isComponent(meta){
+    return typeof meta == 'object' && !!meta.name && !!meta.component
+}
+
+
 
 export function getMeta(appInfo, fullpath, propertys){
 
@@ -57,21 +126,7 @@ export function getMeta(appInfo, fullpath, propertys){
 
 }
 
-export function setMeta(appInfo) {
 
-    if(!appInfo || !appInfo.meta) return
-
-    const appName = appInfo.name
-
-    if( cache.meta.has(appName) )
-        return
-
-    const meta = fromJS(appInfo.meta)
-
-    cache.meta = cache.meta
-        .setIn([appName,'meta'], meta)
-        .setIn([appName, 'metaMap'], parseMeta(meta))
-}
 
 export function getField(state, fieldPath) {
     if (!fieldPath) {
@@ -99,29 +154,6 @@ export function updateField(state, fieldPath, fn) {
     } else {
         return state.updateIn((`data.${fieldPath}`).split('.'), fn)
     }
-}
-
-export function parseMeta(meta) {
-    let ret = Map(),
-        name = meta.get('name')
-
-    ret = ret.set(name, '')
-
-    let parseChildren = (children, parentPath, parentRealPath) => {
-        if (!children) return
-        parentRealPath = parentRealPath? `${parentRealPath}.` : parentRealPath
-        children.forEach((child, index) => {
-            if(typeof child !='string'){
-                let childName = child.get('name'),
-                    path = `${parentPath}.${childName}`,
-                    realPath = `${parentRealPath}children.${index}`
-                ret = ret.set(path, realPath)
-                parseChildren(children.get('children'), path, realPath)
-            }
-        })
-    }
-    parseChildren(meta.get('children'), name, '')
-    return ret
 }
 
 
