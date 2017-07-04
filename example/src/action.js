@@ -1,40 +1,39 @@
 import {
-	action as baseAction
+	action as a
 } from '../../src'
-
-import appInfo from './index.app'
 
 class action {
 	constructor(option){
 		this.appInfo = option.appInfo
-		this.init = this.init.bind(this)
-		this.getMetaHanders = this.getMetaHanders.bind(this)
-		this.baseAction = new baseAction({appInfo:this.appInfo, metaHandlers:this.getMetaHanders()})
+		this.baseAction = new a({appInfo:this.appInfo, metaHandlers:this.getMetaHanders()})
 	}
 
-	init({component, injections}){
+	onInit = ({component, injections}) =>{
 		this.component = component
 		this.injections = injections
+		injections.reduce('init')
+	}
+
+	login = () => {
+		console.log(this.baseAction.gf('form.user'), this.baseAction.gf('form.password'))
 	}
 	
-	getMetaHanders(){
+	getMetaHanders = () =>{
 		return {
-			init:this.init
+			onInit:this.onInit,
+			login: this.login
 		}
 	}
 
-	getReferenceAction(){
-		return {
-			...this.baseAction
-		}
+	getRefs = () =>{
+		return this.baseAction
 	}
-
 }
 
-export default creator(option){
+export default function creator(option){
 	const o = new action(option)
 	return {
-		...o.getReferenceAction(),
+		...o.getRefs(),
 		...o
 	}
 }

@@ -8,7 +8,6 @@ export function getMeta() {
                         component: 'Input',
                         title3: 'bbb',
                         title4: '$$aaa',
-                        onChange:'e.target.value>form.col'
                         value: '##form.col'
                 }, "ssss", {
                         name: 'button',

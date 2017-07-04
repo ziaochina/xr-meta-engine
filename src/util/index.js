@@ -14,6 +14,8 @@ import {
 
 const cache = { meta:Map()}
 
+window['__getCache'] = () => cache
+
 export function setMeta(appInfo) {
 
     if(!appInfo || !appInfo.meta) return
@@ -31,12 +33,14 @@ export function setMeta(appInfo) {
 }
 
 export function parseMeta(meta) {
-    let ret = Map(),
+    let ret = Map()
+
+    /*
         name = meta.get('name')
 
     ret = ret.set(name, '')
 
-    const parseChildren = (children, parentPath, parentRealPath) => {
+    /*const parseChildren = (children, parentPath, parentRealPath) => {
         if (!children) return
         parentRealPath = parentRealPath? `${parentRealPath}.` : parentRealPath
         children.forEach((child, index) => {
@@ -48,29 +52,46 @@ export function parseMeta(meta) {
                 parseChildren(children.get('children'), path, realPath)
             }
         })
-    }
+    }*/
 
 
     const parseProp = (propValue, parentPath, parentRealPath) =>{
-        if(isComponent(propValue)){
-           
-            ret = ret.set(parentPath, parentRealPath)
 
-            for(let p in propValue){
-                if(p != 'children' && p != 'name' && p != 'component'){
-                    parseProp(propValue[p], `${parentPath}.#${p}`, `${parentRealPath}.${p}`)
+        if(typeof propValue == 'object' && propValue.get && propValue.get('name') && propValue.get('component')){
+            const path = parentPath ? `${parentPath}.${propValue.get('name')}` : propValue.get('name')
+            ret = ret.set(path, parentRealPath)
+
+            propValue.keySeq().toArray().forEach(p=>{
+                let v = propValue.get(p)
+                if(p == 'children'){
+                    if(v && typeof v != 'string'){
+                        v.forEach((child,index)=>{
+                            const currentRealPath = parentRealPath ? `${parentRealPath}.children.${index}`: `children.${index}`
+                            parseProp(child, path, currentRealPath)
+                        })
+                    }
                 }
-            }
+                else{
+                    const currentRealPath = parentRealPath ? `${parentRealPath}.${p}`: p
+                    parseProp(v, `${path}.#${p}`,  currentRealPath)
+                }
+            })
         }
     }
 
-    for(let p in meta){
-        if(p != 'children' && p != 'name' && p != 'component'){
-            parseProp(meta[p], `${name}.#${p}`, `${name}.${p}`)
+    parseProp(meta, '', '')
+    debugger
+/*
+    meta.keySeq().toArray().forEach(p=>{
+
+
+         if(p != 'children' && p != 'name' && p != 'component'){
+            parseProp(meta.get(p), `${name}.#${p}`, `${name}.${p}`)
         }
-    }
+    })
 
     parseChildren(meta.get('children'), name, '')
+    */
     return ret
 }
 

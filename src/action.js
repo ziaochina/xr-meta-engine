@@ -4,37 +4,28 @@ import {fromJS} from 'immutable'
 class action {
 	constructor(option) {
 		this.appInfo = option.appInfo
-		this.appName = option.appInfo.name
 		this.meta = fromJS(option.appInfo.meta)
-		this.metaMap = util.parseMeta(this.meta)
 		this.metaHandlers = option.metaHandlers
 
 		util.setMeta(option.appInfo)
-
-		this.initView = this.initView.bind(this)
-		this.getField = this.getField.bind(this)
-		this.getMeta = this.getMeta.bind(this)
-		this.asyncGet = this.asyncGet.bind(this)
-		this.onEvent = this.onEvent.bind(this)
-		this.getDirectFuns = this.getDirectFuns.bind(this)
 	}
 
-	initView(component, injections) {
+	initView = (component, injections) => {
 		this.component = component
 		this.injections = injections
 
 		this.metaHandlers && this.metaHandlers['onInit'] && this.metaHandlers['onInit']({component, injections})
 	}
 
-	getField(fieldPath) {
+	getField = (fieldPath) => {
 		return util.getField(this.injections.getState(), fieldPath)
 	}
 
-	setField(fieldPath, value){
+	setField = (fieldPath, value) => {
 		return this.injections.reduce('setField', fieldPath, value)
 	}
 
-	updateChildrenMeta(childrenMeta, parentPath, rowIndex, vars){
+	updateChildrenMeta = (childrenMeta, parentPath, rowIndex, vars) => {
 		if( !childrenMeta || childrenMeta.size == 0)
 			return 
 
@@ -46,7 +37,7 @@ class action {
 		})
 	}
 
-	updateMeta(meta, path, rowIndex, vars ){
+	updateMeta = (meta, path, rowIndex, vars ) => {
 		Object.keys(meta).forEach(key => {
 			//$$getVisible
 			if(typeof meta[key] == 'string' && meta[key].substring(0,2) === '$$'){
@@ -54,36 +45,45 @@ class action {
 					throw `not found ${meta[key]} handler, please define in action`
 				
 				let handlerName = meta[key].substr(2)
-				meta[key] = ()=> this.metaHandlers[handlerName]({path, rowIndex, vars})
+				meta[key] = ()=> {
+					this.metaHandlers[handlerName]({path, rowIndex, vars})
+				}
+				meta[key] = meta[key].bind(this)
 			}
 
 			//##form.code
 			if(typeof meta[key] == 'string' && meta[key].substring(0,2) === '##'){
-				meta[key] = this.getField(calcBindField(meta[key].substr(2), vars))
+				meta[key] = this.getField(this.calcBindField(meta[key].substr(2), vars))
+				console.log(meta[key])
 			}
 
 			//args[0].target.value->form.code
 			if(typeof meta[key] == 'string' && meta[key].indexOf('->') !== -1){
 				const tmp = meta[key].replace('->', ';').split(';')
-				const f = new Function('args', 'fieldPath', 'valueExpress', 'setField', `setField(fieldPath, valueExpress)`)
-				meta[key] = (...args)=> f(args, this.calcBindField(tmp[1], vars), tmp[0], this.setField)
+				const f = new Function('args', 'fieldPath', 'setField', `setField(fieldPath, ${tmp[0]})`).bind(this)
+				meta[key] = (...args) => {
+					f(args, this.calcBindField(tmp[1], vars),  this.setField)
+				}
+
+				meta[key] = meta[key].bind(this)
 			}
 
 			if(typeof meta[key] == 'object' && meta[key].component){
-				updateMeta(meta[key], parent + '.' + key, rowIndex, vars)
+				this.updateMeta(meta[key], path + '.' + key, rowIndex, vars)
 			}
 
 
 			if(key === 'children')
 				this.updateChildrenMeta(meta[key], path, rowIndex, vars)
 
+			/*
 			if(key === 'bindField'){
 				meta.value = this.getField(meta[key]) 
-			}
+			}*/
 		})
 	}
 
-	calcBindField(bindField, vars) {
+	calcBindField = (bindField, vars) => {
 	    if(!bindField) return bindField
 
 	    if(!vars) return bindField
@@ -99,7 +99,7 @@ class action {
 	    return hit ? bindField : bindField + '.' + vars[0]
 	}
 
-	getMeta(fullPath, propertys){
+	getMeta = (fullPath, propertys) => {
 		const meta = util.getMeta(this.appInfo, fullPath, propertys),
 			parsedPath = util.parsePath(fullPath),
 			path = parsedPath.path,
@@ -110,7 +110,7 @@ class action {
 		return meta
 	}
 
-	async asyncGet(path, property) {
+	asyncGet = async (path, property) => {
 		var parsedPath = util.parsePath(path),
 			eventSource = (parsedPath || {
 				path: 'root'
@@ -129,7 +129,7 @@ class action {
 		}
 	}
 
-	onEvent(eventName, option) {
+	onEvent = (eventName, option) => {
 		var parsedPath = util.parsePath(option.path),
 			eventSource = (parsedPath || {
 				path: 'root'
@@ -149,7 +149,7 @@ class action {
 	}
 
 
-	getDirectFuns() {
+	getDirectFuns = () => {
 		return {
 			getMeta: (path, propertys) => {
 				return this.getMeta(path, propertys)
@@ -172,20 +172,11 @@ class action {
 		}
 	}
 
-	getPublishMethods(){
-		return {
-			initView:this.initView,
-			getMeta:this.getMeta,
-			asyncGet:this.asyncGet,
-			getField:this.getField,
-			onEvent:this.onEvent,
-			getDirectFuns:this.getDirectFuns,
-			gm:this.getMeta,
-			gf:this.getField
-		}
-	}
+	gm = this.getMeta
+
+	gf = this.getField
 }
 
 export default function creator(option) {
-	return new action(option).getPublishMethods()
+	return new action(option)
 }

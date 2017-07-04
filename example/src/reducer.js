@@ -3,29 +3,37 @@ import {
 } from 'immutable'
 
 import {
-	reducer
+	reducer as r
 } from '../../src'
 
 import * as api from './api'
 
-import appInfo from './index.app'
+class reducer{
+	constructor(option){
+		this.baseReducer = new r(option)
+	}
 
-const _r = reducer(appInfo)
-
-export function init(state, option) {
-	const meta = api.getMeta(),
-		data = {
+	init = (state, option) => {
+		const data = {
 			form: {
-				col: '111'
 			}
 		}
-	return _r.init(state, {
-		meta,
-		data
-	})
+		return this.baseReducer.init(state, {
+			data
+		})
+	}
+
+	getRefs = () => {
+		return this.baseReducer
+	}
 }
 
 
-Object.assign(exports, {..._r,
-	...exports
-})
+export default function creator(option){
+	const o = new reducer(option)
+	return {
+		... o.getRefs(),
+		... o
+	}
+}
+

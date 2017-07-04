@@ -3,7 +3,6 @@ import componentFactory from './componentFactory'
 import omit from 'omit.js'
 
 function getComponent(path, meta, props) {
-    debugger
     if(typeof meta == 'string')
         return meta
 
@@ -21,6 +20,12 @@ function getComponent(path, meta, props) {
         childrenProp = getChildrenProp(path, meta.children, props)
     }
 
+    for(let p in meta){
+        if(p !='children' && typeof meta[p] == 'object' && meta[p].component){
+            meta[p] = getComponent(`${path}.#${p}.${meta[p].name}`, meta[p], props)
+        }
+    }
+
     var allProps = {
         ...props, 
         ...meta,
@@ -29,6 +34,8 @@ function getComponent(path, meta, props) {
         key:path
     }
 
+    console.log(path)
+    
     allProps = omit(allProps, ['clearAppState', 'component', 'name', 'getDirectFuns', 'initView', 'payload'])
     
     if(typeof component == 'string' || component.prototype.isReactComponent){
@@ -38,6 +45,7 @@ function getComponent(path, meta, props) {
         return component(allProps)
     }
 }
+
 
 
 function getChildrenProp(parentPath, childrenMeta, props){

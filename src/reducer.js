@@ -69,6 +69,7 @@ class reducer {
 			getMeta:util.getMeta,
 			getField:util.getField,
 			setField:util.setField,
+			getPublishMethods: this.getPublishMethods,
 			gm:util.getMeta,
 			gf:util.getField,
 			sf:util.setField
