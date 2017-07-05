@@ -208,7 +208,7 @@ class action {
 	modal = (...args) =>{
 		const Modal = config.getModal()
 		if(!Modal || args.length == 0 || !Modal[args[0]]) return
-		Modal[args[0]](...args.slice(1))
+		return Modal[args[0]](...args.slice(1))
 	}
 
 	gm = this.getMeta
