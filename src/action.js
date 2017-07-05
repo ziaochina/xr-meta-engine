@@ -199,13 +199,13 @@ class action {
 		Toast[args[0]](args.slice(1))
 	}
 
-	notification = (option) => {
+	notification = (...args) => {
 		const Notification = config.getNotification()
 		if(!Notification || args.length == 0 || !Notification[args[0]]) return
 		Notification[args[0]](args.slice(1))
 	}
 
-	modal = (option) =>{
+	modal = (...args) =>{
 		const Modal = config.getModal()
 		if(!Modal || args.length == 0 || !Modal[args[0]]) return
 		Modal[args[0]](args.slice(1))
