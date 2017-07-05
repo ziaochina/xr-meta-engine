@@ -4,10 +4,14 @@ import {
 
 import cf from './componentFactory'
 
-export default function config(option) {
-	const {
-		components
-	} = option
+var toast, notification, modal
+
+function config(option) {
+	const components = option.components
+
+	toast = option.toast
+	notification = option.notification
+	modal = option.modal
 
 	appLoaderConfig(option)
 
@@ -22,3 +26,9 @@ export default function config(option) {
 			cf.registerComponent(c.name, c.component)
 	})
 }
+
+config.toast = toast
+config.notification = notification
+config.modal = modal
+
+export default config

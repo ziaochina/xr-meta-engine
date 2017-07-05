@@ -41,7 +41,7 @@ export default function creator(option) {
 		o = new action({...option, metaAction}),
 		ret = {...metaAction,...o}
 
-	metaAction.setMetaHandlers(ret)
+	metaAction.config({metaHandlers:ret})
 
 	return ret
 }

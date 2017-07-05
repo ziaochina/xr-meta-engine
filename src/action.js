@@ -1,5 +1,6 @@
 import * as util from './util'
 import {fromJS} from 'immutable'
+import config from './config'
 
 class action {
 	constructor(option) {
@@ -7,11 +8,10 @@ class action {
 		this.meta = fromJS(option.appInfo.meta)
 		this.cache = {}
 
-
 		util.setMeta(option.appInfo)
 	}
 
-	setMetaHandlers = metaHandlers => {
+	config = ({metaHandlers}) => {
 		this.metaHandlers = metaHandlers
 	}
 
@@ -96,54 +96,6 @@ class action {
 				values = values.concat([path, rowIndex, vars])
 				meta[key] = f.apply(this, values)
 			}
-/*
-			else if(t == 'string' && v.length > 2){
-				
-			
-				//$$ action function
-				if(v.substring(0,2) == '$$'){
-
-					let handlerName = meta[key].substr(2)
-
-					if(!this.metaHandlers || !this.metaHandlers[handlerName] )
-						throw `not found ${v} handler, please define in action`
-					
-					meta[key] = (...args)=> {
-						this.metaHandlers[handlerName]({...args, path, rowIndex, vars})
-					}
-
-					meta[key] = meta[key].bind(this)
-				}
-
-				//$= exec action function
-				else if(v.substring(0,2) == '$='){
-					let handlerName = meta[key].substr(2)
-
-					if(!this.metaHandlers || !this.metaHandlers[handlerName] )
-						throw `not found ${v} handler, please define in action`
-
-					meta[key] = this.metaHandlers[handlerName]({path, rowIndex, vars})
-				}
-
-				//%= state field value
-				else if(v.substring(0,2) == '%='){
-					meta[key] = this.getField(this.calcBindField(v.substr(2), vars))
-				}
-
-				//event argument -> state field
-				else if(v.indexOf('->') != -1){
-
-					const tmp = meta[key].replace('->', ';').split(';')
-					const f = new Function('args', 'fieldPath', 'setField', `setField(fieldPath, ${tmp[0]})`).bind(this)
-					
-					meta[key] = (...args) => {
-						f(args, this.calcBindField(tmp[1], vars),  this.setField)
-					}
-
-					meta[key] = meta[key].bind(this)
-				}
-			}
-*/
 
 			else if(t == 'object' && v.component){
 				this.updateMeta(meta[key], path + '.' + key, rowIndex, vars, data)
@@ -240,6 +192,12 @@ class action {
 			}
 		}
 	}
+
+	toast = config.toast
+
+	notification = config.notification
+	
+	modal = config.modal
 
 	gm = this.getMeta
 
