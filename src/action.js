@@ -196,19 +196,19 @@ class action {
 	toast = (...args) => {
 		const Toast = config.getToast()
 		if(!Toast || args.length == 0 || !Toast[args[0]]) return
-		Toast[args[0]](args.slice(1))
+		Toast[args[0]](...args.slice(1))
 	}
 
 	notification = (...args) => {
 		const Notification = config.getNotification()
 		if(!Notification || args.length == 0 || !Notification[args[0]]) return
-		Notification[args[0]](args.slice(1))
+		Notification[args[0]](...args.slice(1))
 	}
 
 	modal = (...args) =>{
 		const Modal = config.getModal()
 		if(!Modal || args.length == 0 || !Modal[args[0]]) return
-		Modal[args[0]](args.slice(1))
+		Modal[args[0]](...args.slice(1))
 	}
 
 	gm = this.getMeta
