@@ -1,39 +1,33 @@
-import {
-	Map
-} from 'immutable'
+import { Map } from 'immutable'
 
-import {
-	reducer as r
-} from '../../src'
+import { reducer as MetaReducer } from '../../src'
 
 import * as api from './api'
 
-class reducer{
+class reducer {
+	
 	constructor(option){
-		this.baseReducer = new r(option)
+		this.metaReducer = option.metaReducer
 	}
 
 	init = (state, option) => {
+		
 		const data = {
 			form: {
+				user:'1',
+				password:'1'
 			}
 		}
-		return this.baseReducer.init(state, {
-			data
-		})
-	}
 
-	getRefs = () => {
-		return this.baseReducer
+		return this.metaReducer.init(state, {data})
 	}
 }
 
 
 export default function creator(option){
-	const o = new reducer(option)
-	return {
-		... o.getRefs(),
-		... o
-	}
+	const metaReducer = new MetaReducer(option),
+		o = new reducer({...option, metaReducer})
+
+	return {...metaReducer, ... o}
 }
 

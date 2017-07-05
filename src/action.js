@@ -5,9 +5,14 @@ class action {
 	constructor(option) {
 		this.appInfo = option.appInfo
 		this.meta = fromJS(option.appInfo.meta)
-		this.metaHandlers = option.metaHandlers
+		this.cache = {}
+
 
 		util.setMeta(option.appInfo)
+	}
+
+	setMetaHandlers = metaHandlers => {
+		this.metaHandlers = metaHandlers
 	}
 
 	initView = (component, injections) => {
@@ -25,7 +30,35 @@ class action {
 		return this.injections.reduce('setField', fieldPath, value)
 	}
 
-	updateChildrenMeta = (childrenMeta, parentPath, rowIndex, vars) => {
+
+	parseExpreesion = (v) =>{
+		const reg = new RegExp(/\{\{([^{}]+)\}\}/)
+
+		if(!this.cache.expression)
+			this.cache.expression = {}
+
+		if(this.cache.expression[v]){
+			return this.cache.expression[v]
+		}
+
+		if(!this.cache.expressionParams){
+			this.cache.expressionParams = ['data']
+				.concat(Object.keys(this.metaHandlers).map(k=>"$"+k))
+				.concat(['_path', '_rowIndex', '_vars'])
+		}
+
+		var params = this.cache.expressionParams
+
+		var body = "return " + v
+			.replace(reg, (word,group)=> group)
+			.replace(/\([ ]*\)/g, word=>`({path:_path, rowIndex:_rowIndex, vars: _vars})`)
+
+		this.cache.expression[v] = new Function(...params, body)
+
+		return this.cache.expression[v]
+	}
+
+	updateChildrenMeta = (childrenMeta, parentPath, rowIndex, vars, data) => {
 		if( !childrenMeta || childrenMeta.size == 0)
 			return 
 
@@ -33,53 +66,88 @@ class action {
 			return
 		
 		childrenMeta.map(child=>{
-			this.updateMeta(child, `${parentPath}.${child.name}`, rowIndex, vars)
+			this.updateMeta(child, `${parentPath}.${child.name}`, rowIndex, vars, data)
 		})
 	}
 
-	updateMeta = (meta, path, rowIndex, vars ) => {
+
+
+	updateMeta = (meta, path, rowIndex, vars, data ) => {
+		const reg = new RegExp(/\{\{([^{}]+)\}\}/)
+
 		Object.keys(meta).forEach(key => {
-			//$$getVisible
-			if(typeof meta[key] == 'string' && meta[key].substring(0,2) === '$$'){
-				if(!this.metaHandlers || !this.metaHandlers[meta[key].substring(2)] )
-					throw `not found ${meta[key]} handler, please define in action`
+			let v = meta[key],
+				t = typeof v
+
+			if(key === 'children'){
+				this.updateChildrenMeta(meta[key], path, rowIndex, vars, data)
+			}
+
+			else if(t == 'string' && reg.test(v)){
+
+				let f = this.parseExpreesion(v)
 				
-				let handlerName = meta[key].substr(2)
-				meta[key] = ()=> {
-					this.metaHandlers[handlerName]({path, rowIndex, vars})
+				let values = [data]
+
+				Object.keys(this.metaHandlers).forEach(k=>{
+					values.push(this.metaHandlers[k])
+				})
+
+				values = values.concat([path, rowIndex, vars])
+				meta[key] = f.apply(this, values)
+			}
+/*
+			else if(t == 'string' && v.length > 2){
+				
+			
+				//$$ action function
+				if(v.substring(0,2) == '$$'){
+
+					let handlerName = meta[key].substr(2)
+
+					if(!this.metaHandlers || !this.metaHandlers[handlerName] )
+						throw `not found ${v} handler, please define in action`
+					
+					meta[key] = (...args)=> {
+						this.metaHandlers[handlerName]({...args, path, rowIndex, vars})
+					}
+
+					meta[key] = meta[key].bind(this)
 				}
-				meta[key] = meta[key].bind(this)
-			}
 
-			//##form.code
-			if(typeof meta[key] == 'string' && meta[key].substring(0,2) === '##'){
-				meta[key] = this.getField(this.calcBindField(meta[key].substr(2), vars))
-				console.log(meta[key])
-			}
+				//$= exec action function
+				else if(v.substring(0,2) == '$='){
+					let handlerName = meta[key].substr(2)
 
-			//args[0].target.value->form.code
-			if(typeof meta[key] == 'string' && meta[key].indexOf('->') !== -1){
-				const tmp = meta[key].replace('->', ';').split(';')
-				const f = new Function('args', 'fieldPath', 'setField', `setField(fieldPath, ${tmp[0]})`).bind(this)
-				meta[key] = (...args) => {
-					f(args, this.calcBindField(tmp[1], vars),  this.setField)
+					if(!this.metaHandlers || !this.metaHandlers[handlerName] )
+						throw `not found ${v} handler, please define in action`
+
+					meta[key] = this.metaHandlers[handlerName]({path, rowIndex, vars})
 				}
 
-				meta[key] = meta[key].bind(this)
+				//%= state field value
+				else if(v.substring(0,2) == '%='){
+					meta[key] = this.getField(this.calcBindField(v.substr(2), vars))
+				}
+
+				//event argument -> state field
+				else if(v.indexOf('->') != -1){
+
+					const tmp = meta[key].replace('->', ';').split(';')
+					const f = new Function('args', 'fieldPath', 'setField', `setField(fieldPath, ${tmp[0]})`).bind(this)
+					
+					meta[key] = (...args) => {
+						f(args, this.calcBindField(tmp[1], vars),  this.setField)
+					}
+
+					meta[key] = meta[key].bind(this)
+				}
 			}
+*/
 
-			if(typeof meta[key] == 'object' && meta[key].component){
-				this.updateMeta(meta[key], path + '.' + key, rowIndex, vars)
+			else if(t == 'object' && v.component){
+				this.updateMeta(meta[key], path + '.' + key, rowIndex, vars, data)
 			}
-
-
-			if(key === 'children')
-				this.updateChildrenMeta(meta[key], path, rowIndex, vars)
-
-			/*
-			if(key === 'bindField'){
-				meta.value = this.getField(meta[key]) 
-			}*/
 		})
 	}
 
@@ -104,9 +172,10 @@ class action {
 			parsedPath = util.parsePath(fullPath),
 			path = parsedPath.path,
 			rowIndex = parsedPath.vars ? parsedPath.vars[0] : undefined,
-			vars = parsedPath.vars
+			vars = parsedPath.vars,
+			data = util.getField(this.injections.getState()).toJS() 
 
-		this.updateMeta(meta, path, rowIndex, vars)
+		this.updateMeta(meta, path, rowIndex, vars, data)
 		return meta
 	}
 

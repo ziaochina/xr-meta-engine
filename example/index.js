@@ -17,8 +17,6 @@ config({
 
 
 Object.keys(_src.metaComponents).forEach(key=>{
-	const ccc = _src.metaComponents
-
 	componentFactory.registerAppComponent(_src.name, key, _src.metaComponents[key])
 })
 

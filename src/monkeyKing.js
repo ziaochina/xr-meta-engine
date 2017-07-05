@@ -34,9 +34,10 @@ function getComponent(path, meta, props) {
         key:path
     }
 
-    console.log(path)
-    
     allProps = omit(allProps, ['clearAppState', 'component', 'name', 'getDirectFuns', 'initView', 'payload'])
+
+    if(allProps['_visible'] === false)
+        return null
     
     if(typeof component == 'string' || component.prototype.isReactComponent){
         return React.createElement(component, allProps)

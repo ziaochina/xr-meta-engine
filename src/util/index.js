@@ -155,25 +155,25 @@ export function getField(state, fieldPath) {
     }
     
     if (fieldPath instanceof Array) {
-        return state.getIn(['data'].concat(fieldPath))
+        return state.getIn(fieldPath)
     } else {
-        return state.getIn((`data.${fieldPath}`).split('.'))
+        return state.getIn(fieldPath.split('.'))
     }
 }
 
 export function setField(state, fieldPath, value) {
     if (fieldPath instanceof Array) {
-        return state.setIn(['data'].concat(fieldPath), value)
+        return state.setIn(fieldPath, value)
     } else {
-        return state.setIn((`data.${fieldPath}`).split('.'), value)
+        return state.setIn(fieldPath.split('.'), value)
     }
 }
 
 export function updateField(state, fieldPath, fn) {
     if (fieldPath instanceof Array) {
-        return state.updateIn(['data'].concat(fieldPath), fn)
+        return state.updateIn(fieldPath, fn)
     } else {
-        return state.updateIn((`data.${fieldPath}`).split('.'), fn)
+        return state.updateIn(fieldPath.split('.'), fn)
     }
 }
 

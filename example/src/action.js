@@ -1,11 +1,9 @@
-import {
-	action as a
-} from '../../src'
+import { action as MetaAction } from '../../src'
 
 class action {
+	
 	constructor(option){
-		this.appInfo = option.appInfo
-		this.baseAction = new a({appInfo:this.appInfo, metaHandlers:this.getMetaHanders()})
+		this.metaAction = option.metaAction
 	}
 
 	onInit = ({component, injections}) =>{
@@ -15,25 +13,35 @@ class action {
 	}
 
 	login = () => {
-		console.log(this.baseAction.gf('form.user'), this.baseAction.gf('form.password'))
-	}
-	
-	getMetaHanders = () =>{
-		return {
-			onInit:this.onInit,
-			login: this.login
+		const user = this.metaAction.gf('data.form.user'), 
+			pass = this.metaAction.gf('data.form.password')
+
+		if(user == 1 && pass == 1){
+			this.metaAction.setField('data.isLogin', true)
+			console.log('ok')
+		}
+		else{
+			console.log('error')
 		}
 	}
 
-	getRefs = () =>{
-		return this.baseAction
+	logout = () => {
+		if( this.metaAction.getField('data.isLogin') === true )
+			this.metaAction.setField('data.isLogin', false)
 	}
+
+	isLogin = () => {
+		return this.metaAction.getField('data.isLogin') === true
+	}
+
 }
 
-export default function creator(option){
-	const o = new action(option)
-	return {
-		...o.getRefs(),
-		...o
-	}
+export default function creator(option) {
+	const metaAction = new MetaAction(option),
+		o = new action({...option, metaAction}),
+		ret = {...metaAction,...o}
+
+	metaAction.setMetaHandlers(ret)
+
+	return ret
 }

@@ -14,32 +14,59 @@ module.exports = {
 	}
 }
 
-
+//:: react element
+//$$ action function
+//$= exec action function
+//%= state value
+ 
 function getMeta() {
 	return {
 		name: 'root',
-		component: '_div',
+		component: '::div',
 		children: [{
 				name: 'hello',
 				component: 'Hello',
-			},
-			'user:', {
+			},{
+				name:'userLabel',
+				component:'::span',
+				children:'user:',
+				_visible:'{{data.isLogin !== true}}'
+			},{
 				name: 'user',
-				component: '_input',
-				value: '##form.user',
-				onChange: 'args[0].target.value->form.user'
-			}, 'password:', {
+				component: '::input',
+				value: '{{data.form.user}}',
+				onChange: "{{ (e) => $setField('data.form.user', e.target.value ) }}",
+				_visible:'{{$isLogin() === false}}'
+			}, {
+				name:'pwdLabel',
+				component:'::span',
+				children:'password:',
+				_visible:'{{data.isLogin !== true}}'
+			}, {
 				name: 'password',
-				component: '_input',
+				component: '::input',
 				type: 'password',
-				value: '##form.password',
-				onChange: 'args[0].target.value->form.password'
+				value: '{{data.form.password}}',
+				onChange: "{{ (e) => $setField('data.form.password', e.target.value ) }}",
+				_visible:'{{$isLogin() === false}}'
 			}, {
 				name: 'button',
-				component: '_button',
+				component: '::button',
 				children: 'login',
-				onClick: '$$login'
-			},
+				onClick: '{{$login}}',
+				_visible:'{{$isLogin() === false}}'
+			},{
+				name:'welcome',
+				component:'::div',
+				children:'welcome',
+				_visible:'{{$isLogin()}}'
+			},{
+				name:'logout',
+				component:'::button',
+				children:'logout',
+				onClick: '{{$logout}}',
+				_visible:'{{$isLogin()}}'
+			}
 		]
 
 	}

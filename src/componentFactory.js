@@ -29,8 +29,8 @@ class componentFactory {
         if(!name)
             throw 'component name can not null'
 
-        if(name.substring(0,1) == '_'){
-            return name.substr(1)
+        if(name.substring(0,2) == '::'){
+            return name.substr(2)
         }
 
         const nameSegs = name.split('.'),
