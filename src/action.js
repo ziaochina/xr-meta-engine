@@ -193,14 +193,10 @@ class action {
 		}
 	}
 
-	toast = (option) => {
+	toast = (...args) => {
 		const Toast = config.getToast()
-		if(!Toast) return
-
-		if(!option.type)
-			Toast.info(...option)
-
-		Toast[option.type](...option)
+		if(!Toast || args.length == 0 || !Toast[args[0]]) return
+		Toast[args[0]](args.slice(1))
 	}
 
 	notification = (option) => {
