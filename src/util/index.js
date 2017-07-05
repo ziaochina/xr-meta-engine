@@ -1,4 +1,4 @@
-import {
+import Immutable,{
     Map,
     List,
     fromJS
@@ -72,10 +72,13 @@ export function parseMeta(meta) {
                     }
                 }
                 else{
-                    if(v instanceof Array){
+                    if(p == 'columns')
+                        debugger
+
+                    if(v instanceof Immutable.List){
                         v.forEach((c, index)=>{
                             let currentRealPath = parentRealPath ? `${parentRealPath}.${p}.${index}`: `${p}.${index}`
-                            parseProp(child, `${path}.#${p}`, currentRealPath)
+                            parseProp(c, `${path}.#${p}`, currentRealPath)
                         })
                     }else{
                         let currentRealPath = parentRealPath ? `${parentRealPath}.${p}`: p
