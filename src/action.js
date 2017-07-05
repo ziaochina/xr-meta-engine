@@ -201,22 +201,14 @@ class action {
 
 	notification = (option) => {
 		const Notification = config.getNotification()
-		if(!Notification) return
-
-		if(!option.type)
-			Notification.open(...option)
-
-		Notification[option.type](...option)
+		if(!Notification || args.length == 0 || !Notification[args[0]]) return
+		Notification[args[0]](args.slice(1))
 	}
 
 	modal = (option) =>{
 		const Modal = config.getModal()
-		if(!Modal) return
-
-		if(!option.type)
-			Modal.show(...option)
-
-		Modal[option.type](...option)
+		if(!Modal || args.length == 0 || !Modal[args[0]]) return
+		Modal[args[0]](args.slice(1))
 	}
 
 	gm = this.getMeta
