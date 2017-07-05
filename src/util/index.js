@@ -66,14 +66,23 @@ export function parseMeta(meta) {
                 if(p == 'children'){
                     if(v && typeof v != 'string'){
                         v.forEach((child,index)=>{
-                            const currentRealPath = parentRealPath ? `${parentRealPath}.children.${index}`: `children.${index}`
+                            let currentRealPath = parentRealPath ? `${parentRealPath}.children.${index}`: `children.${index}`
                             parseProp(child, path, currentRealPath)
                         })
                     }
                 }
                 else{
-                    const currentRealPath = parentRealPath ? `${parentRealPath}.${p}`: p
-                    parseProp(v, `${path}.#${p}`,  currentRealPath)
+                    if(v instanceof Array){
+                        v.forEach((c, index)=>{
+                            let currentRealPath = parentRealPath ? `${parentRealPath}.${p}.${index}`: `${p}.${index}`
+                            parseProp(child, `${path}.#${p}`, currentRealPath)
+                        })
+                    }else{
+                        let currentRealPath = parentRealPath ? `${parentRealPath}.${p}`: p
+                        parseProp(v, `${path}.#${p}`,  currentRealPath)
+
+                    }
+
                 }
             })
         }
