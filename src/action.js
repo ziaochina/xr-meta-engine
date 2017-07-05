@@ -193,11 +193,35 @@ class action {
 		}
 	}
 
-	toast = config.toast
+	toast = (option) => {
+		const Toast = config.getToast()
+		if(!Toast) return
 
-	notification = config.notification
-	
-	modal = config.modal
+		if(!option.type)
+			Toast.info(...option)
+
+		Toast[option.type](...option)
+	}
+
+	notification = (option) => {
+		const Notification = config.getNotification()
+		if(!Notification) return
+
+		if(!option.type)
+			Notification.open(...option)
+
+		Notification[option.type](...option)
+	}
+
+	modal = (option) =>{
+		const Modal = config.getModal()
+		if(!Modal) return
+
+		if(!option.type)
+			Modal.show(...option)
+
+		Modal[option.type](...option)
+	}
 
 	gm = this.getMeta
 

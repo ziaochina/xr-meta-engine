@@ -27,8 +27,8 @@ function config(option) {
 	})
 }
 
-config.toast = toast
-config.notification = notification
-config.modal = modal
+config.getToast = ()=> toast
+config.getNotification = () => notification
+config.getModal = () => modal
 
 export default config
