@@ -56,40 +56,30 @@ export function parseMeta(meta) {
 
 
     const parseProp = (propValue, parentPath, parentRealPath) =>{
-
-        if(typeof propValue == 'object' && propValue.get && propValue.get('name') && propValue.get('component')){
-            const path = parentPath ? `${parentPath}.${propValue.get('name')}` : propValue.get('name')
-            ret = ret.set(path, parentRealPath)
-
-            propValue.keySeq().toArray().forEach(p=>{
-                let v = propValue.get(p)
-                if(p == 'children'){
-                    if(v && typeof v != 'string'){
-                        v.forEach((child,index)=>{
-                            let currentRealPath = parentRealPath ? `${parentRealPath}.children.${index}`: `children.${index}`
-                            parseProp(child, path, currentRealPath)
-                        })
-                    }
-                }
-                else{
-                    if(p == 'columns')
-                        debugger
-
-                    if(v instanceof Immutable.List){
-                        v.forEach((c, index)=>{
-                            let currentRealPath = parentRealPath ? `${parentRealPath}.${p}.${index}`: `${p}.${index}`
-                            parseProp(c, `${path}.#${p}`, currentRealPath)
-                        })
-                    }else{
-                        let currentRealPath = parentRealPath ? `${parentRealPath}.${p}`: p
-                        parseProp(v, `${path}.#${p}`,  currentRealPath)
-
-                    }
-
-                }
-            })
+        if(! (propValue instanceof Immutable.Map)){
+            return
         }
-    }
+
+        if( propValue.get('name') && propValue.get('component')){
+            parentPath = parentPath ? `${parentPath}.${propValue.get('name')}` : propValue.get('name')
+            ret = ret.set(parentPath, parentRealPath)
+        }
+
+        propValue.keySeq().toArray().forEach(p=>{
+
+            let v = propValue.get(p),
+                currentPath = parentPath? `${parentPath}.${p}` : p
+            if(v instanceof Immutable.List){
+                v.forEach((c, index)=>{
+                    let currentRealPath = parentRealPath ? `${parentRealPath}.${p}.${index}`: `${p}.${index}`
+                    parseProp(c, `${currentPath}`, currentRealPath)
+                })
+            }else{
+                let currentRealPath = parentRealPath ? `${parentRealPath}.${p}`: p
+                parseProp(v, `${currentPath}`,  currentRealPath)
+            }
+        })
+}
 
     parseProp(meta, '', '')
     debugger
