@@ -1,65 +1,67 @@
 import React from 'react'
+import {AppLoader} from 'xr-app-loader'
 import componentFactory from './componentFactory'
 import omit from 'omit.js'
 
-
-function metaToComponent(meta, props){
-    if(typeof meta == 'object'){
+function metaToComponent(meta, props) {
+    if (typeof meta == 'object') {
 
         const propsFromMeta = {}
 
-        Object.keys(meta).forEach(key=>{
+        Object.keys(meta).forEach(key => {
             let v = meta[key],
                 t = typeof v
-            
-            if( v instanceof Array){
+
+            if (v instanceof Array) {
                 propsFromMeta[key] = []
-                v.forEach(c=>{
+                v.forEach(c => {
                     propsFromMeta[key].push(metaToComponent(c, props))
                 })
             }
-            else if(t == 'object'){
-                 propsFromMeta[key] = metaToComponent(v, props)
+            else if (t == 'object') {
+                propsFromMeta[key] = metaToComponent(v, props)
             }
-            else{
+            else {
                 propsFromMeta[key] = v
             }
         })
-    
 
-        if(meta.component){
+        if (meta.component) {
             const componentName = meta.component,
                 component = componentFactory.getComponent(props.appName, componentName)
 
             var allProps = {
                 ...props,
                 ...propsFromMeta,
-                key:meta.path
+                key: meta.path
             }
 
             allProps = omit(allProps, ['clearAppState', 'component', 'name', 'getDirectFuns', 'initView', 'payload'])
 
-            if(allProps['_visible'] === false)
+            if (allProps['_visible'] === false)
                 return null
-        
-            if(typeof component == 'string' || component.prototype.isReactComponent){
+
+            if (typeof component == 'string' || component.prototype.isReactComponent) {
                 return React.createElement(component, allProps)
             }
-            else{
+            else {
                 return component(allProps)
             }
         }
-        else{
+        else {
             return propsFromMeta
         }
     }
-    else{
+    else if (typeof meta == 'string' && meta.indexOf('app:') != -1) {
+        return meta
+    }
+    else {
         return meta
     }
 }
 
 const MonkeyKing = (props) => {
-	const { path, gm } = props
+    const { path, gm } = props
     const component = metaToComponent(gm(path), props)
     return component
 }

@@ -1,3 +1,5 @@
+import React from 'react'
+import {AppLoader} from 'xr-app-loader'
 import * as util from './util'
 import {fromJS} from 'immutable'
 import config from './config'
@@ -29,7 +31,6 @@ class action {
 	setField = (fieldPath, value) => {
 		return this.injections.reduce('setField', fieldPath, value)
 	}
-
 
 	parseExpreesion = (v) =>{
 		const reg = new RegExp(/\{\{([^{}]+)\}\}/)
@@ -168,7 +169,6 @@ class action {
 		}
 	}
 
-
 	getDirectFuns = () => {
 		return {
 			getMeta: (path, propertys) => {
@@ -208,6 +208,10 @@ class action {
 		const Modal = config.getModal()
 		if(!Modal || args.length == 0 || !Modal[args[0]]) return
 		return Modal[args[0]](...args.slice(1))
+	}
+
+	appLoader = (appName, ...args) =>{
+		return <AppLoader  {...args} name={appName} />
 	}
 
 	gm = this.getMeta
