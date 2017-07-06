@@ -2,68 +2,66 @@ import React from 'react'
 import componentFactory from './componentFactory'
 import omit from 'omit.js'
 
-function getComponent(path, meta, props) {
-    if(typeof meta == 'string')
-        return meta
 
-    const componentName = meta.component
+function metaToComponent(meta, props){
+    if(typeof meta == 'object'){
 
-    if (!componentName) {
-        return 
-    }
+        const propsFromMeta = {}
 
-    const component = componentFactory.getComponent(props.appName, componentName)
+        Object.keys(meta).forEach(key=>{
+            let v = meta[key],
+                t = typeof v
+            
+            if( v instanceof Array){
+                propsFromMeta[key] = []
+                v.forEach(c=>{
+                    propsFromMeta[key].push(metaToComponent(c, props))
+                })
+            }
+            else if(t == 'object'){
+                 propsFromMeta[key] = metaToComponent(v, props)
+            }
+            else{
+                propsFromMeta[key] = v
+            }
+        })
+    
 
-    var childrenProp = meta.children 
+        if(meta.component){
+            const componentName = meta.component,
+                component = componentFactory.getComponent(props.appName, componentName)
 
-    if(typeof meta.children != 'string'){
-        childrenProp = getChildrenProp(path, meta.children, props)
-    }
+            var allProps = {
+                ...props,
+                ...propsFromMeta,
+                key:meta.path
+            }
 
-    for(let p in meta){
-        if(p !='children' && typeof meta[p] == 'object' && meta[p].component){
-            meta[p] = getComponent(`${path}.#${p}.${meta[p].name}`, meta[p], props)
+            allProps = omit(allProps, ['clearAppState', 'component', 'name', 'getDirectFuns', 'initView', 'payload'])
+
+            if(allProps['_visible'] === false)
+                return null
+        
+            if(typeof component == 'string' || component.prototype.isReactComponent){
+                return React.createElement(component, allProps)
+            }
+            else{
+                return component(allProps)
+            }
+        }
+        else{
+            return propsFromMeta
         }
     }
-
-    var allProps = {
-        ...props, 
-        ...meta,
-        children:childrenProp,
-        path:path,
-        key:path
-    }
-
-    allProps = omit(allProps, ['clearAppState', 'component', 'name', 'getDirectFuns', 'initView', 'payload'])
-
-    if(allProps['_visible'] === false)
-        return null
-    
-    if(typeof component == 'string' || component.prototype.isReactComponent){
-        return React.createElement(component, allProps)
-    }
     else{
-        return component(allProps)
+        return meta
     }
-}
-
-
-
-function getChildrenProp(parentPath, childrenMeta, props){
-    if(!childrenMeta || childrenMeta.length == 0)    
-        return
-
-    const ret = []
-    childrenMeta.forEach(c=>{
-        ret.push(getComponent(`${parentPath}.${c.name}`, c, props)) 
-    })
-
-    return ret
 }
 
 const MonkeyKing = (props) => {
 	const { path, gm } = props
-    return getComponent(path, gm(path), props)
+    const component = metaToComponent(gm(path), props)
+    return component
 }
 
 export default MonkeyKing

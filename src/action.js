@@ -58,33 +58,19 @@ class action {
 		return this.cache.expression[v]
 	}
 
-	updateChildrenMeta = (childrenMeta, parentPath, rowIndex, vars, data) => {
-		if( !childrenMeta || childrenMeta.size == 0)
-			return 
-
-		if(typeof childrenMeta === 'string')
-			return
-		
-		childrenMeta.map(child=>{
-			this.updateMeta(child, `${parentPath}.${child.name}`, rowIndex, vars, data)
-		})
-	}
-
-
-
 	updateMeta = (meta, path, rowIndex, vars, data ) => {
 		const reg = new RegExp(/\{\{([^{}]+)\}\}/)
 
+		if(meta.name && meta.component){
+			meta.path = path 
+		}
+
 		Object.keys(meta).forEach(key => {
 			let v = meta[key],
-				t = typeof v
+				t = typeof v,
+				currentPath = path
 
-			if(key === 'children'){
-				this.updateChildrenMeta(meta[key], path, rowIndex, vars, data)
-			}
-
-			else if(t == 'string' && reg.test(v)){
-
+			if(t == 'string' && reg.test(v)){
 				let f = this.parseExpreesion(v)
 				
 				let values = [data]
@@ -93,13 +79,26 @@ class action {
 					values.push(this.metaHandlers[k])
 				})
 
-				values = values.concat([path, rowIndex, vars])
+				values = values.concat([currentPath, rowIndex, vars])
 				meta[key] = f.apply(this, values)
 			}
+			else if( v instanceof Array ){
 
-			else if(t == 'object' && v.component){
-				this.updateMeta(meta[key], path + '.' + key, rowIndex, vars, data)
+				v.forEach(c=>{
+					currentPath = path
+					if(c.name && c.component){
+						currentPath = currentPath ? `${currentPath}.${key}.${c.name}` : `${key}.${c.name}`
+					}
+					this.updateMeta(c, currentPath, rowIndex, vars, data)
+				})
 			}
+			else if( t == 'object'){
+				if(v.name && v.component){
+					currentPath = currentPath ? `${currentPath}.${key}.${v.name}` : `${key}.${v.name}`
+				}
+				this.updateMeta(meta[key], currentPath, rowIndex, vars, data)
+			}
+			
 		})
 	}
 
