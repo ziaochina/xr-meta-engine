@@ -1,10 +1,9 @@
-import {start} from 'xr-app-loader'
+import {start, AppLoader} from 'xr-app-loader'
 import config from './config'
 import action from './action'
 import reducer from './reducer'
 import wrapper from './wrapper'
 import componentFactory from './componentFactory'
-import monkeyKing from './monkeyKing'
 
 export default {
 	start, 
@@ -13,5 +12,5 @@ export default {
 	reducer,
 	wrapper,
 	componentFactory,
-	monkeyKing
+	AppLoader
 }
