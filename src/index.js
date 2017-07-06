@@ -4,6 +4,7 @@ import action from './action'
 import reducer from './reducer'
 import wrapper from './wrapper'
 import componentFactory from './componentFactory'
+import monkeyKing from './monkeyKing'
 
 export default {
 	start, 
@@ -11,5 +12,6 @@ export default {
 	action,
 	reducer,
 	wrapper,
-	componentFactory
+	componentFactory,
+	monkeyKing
 }
