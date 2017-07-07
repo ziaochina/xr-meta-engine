@@ -48,7 +48,7 @@ function metaToComponent(meta, props) {
                 })
             }
 
-            if(meta['_power'] && meta['_power'].index('=>')!=-1){
+            if(meta['_power'] && meta['_power'].indexOf('=>')!=-1){
                 return (...args) =>{
                     let varsString = new Function('return '+meta['_power'])(...args)
                     return metaToComponent({...props.gm(meta.path + ',' + varsString), _power:undefined}, props)
