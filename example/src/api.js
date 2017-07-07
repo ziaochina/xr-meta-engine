@@ -13,23 +13,13 @@ export function getMeta() {
                         name: 'button',
                         component: 'Button',
                         children: 'fewfewfewfewfew'
+                }, {
+                        name:'span',
+                        component:'Span',
+                        children:"{{data.details[{0}]}}",
+                        _power:'for in data.details'
                 }]
 
         }
-        return {
-                name: 'root',
-                component: 'Div',
-                children: [{
-                        name: 'Input',
-                        title3: 'bbb',
-                        title4: 'bbb',
-                        component: 'Input',
-                        bindField: 'form.col'
-                }, "ssss", {
-                        name: 'button',
-                        component: 'Button',
-                        children: 'fewfewfewfewfew'
-                }]
-
-        }
+    
 }

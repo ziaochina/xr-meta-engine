@@ -1,38 +1,66 @@
 import React from 'react'
-import {AppLoader} from 'xr-app-loader'
+import { AppLoader } from 'xr-app-loader'
 import componentFactory from './componentFactory'
 import omit from 'omit.js'
+
+function parseMetaProps(meta, props) {
+    const ret = {}
+
+    Object.keys(meta).forEach(key => {
+        let v = meta[key],
+            t = typeof v
+
+        if (v instanceof Array) {
+            ret[key] = []
+            v.forEach(c => {
+                let mc = metaToComponent(c, props)
+                if(mc instanceof Array)
+                    ret[key] = ret[key].concat(mc)
+                else
+                    ret[key].push(mc)
+            })
+        }
+        else if (t == 'object') {
+            ret[key] = metaToComponent(v, props)
+        }
+        else {
+            ret[key] = v
+        }
+    })
+
+    return ret
+}
 
 function metaToComponent(meta, props) {
     if (typeof meta == 'object') {
 
-        const propsFromMeta = {}
+        if (meta.component) {
+            if (meta['_visible'] === false)
+                return null
 
-        Object.keys(meta).forEach(key => {
-            let v = meta[key],
-                t = typeof v
-
-            if (v instanceof Array) {
-                propsFromMeta[key] = []
-                v.forEach(c => {
-                    propsFromMeta[key].push(metaToComponent(c, props))
+            if (meta['_power'] && /for[ ]+in/.test(meta['_power'])) {
+                let items = props.gf(meta['_power'].replace(/for[ ]+in/, '').replace(' ', ''))
+                
+                if (!items || items.size == 0) return
+                items = items.toJS()
+                return items.map((o, index) => {
+                    return  metaToComponent({...props.gm(meta.path + ',' +index), _power:undefined}, props)
                 })
             }
-            else if (t == 'object') {
-                propsFromMeta[key] = metaToComponent(v, props)
-            }
-            else {
-                propsFromMeta[key] = v
-            }
-        })
 
-        if (meta.component) {
+            if(meta['_power'] && meta['_power'].index('=>')!=-1){
+                return (...args) =>{
+                    let varsString = new Function('return '+meta['_power'])(...args)
+                    return metaToComponent({...props.gm(meta.path + ',' + varsString), _power:undefined}, props)
+                }
+            }
+
             const componentName = meta.component,
                 component = componentFactory.getComponent(props.appName, componentName)
 
             var allProps = {
                 ...props,
-                ...propsFromMeta,
+                ...parseMetaProps(meta, props),
                 key: meta.path
             }
 
@@ -49,11 +77,8 @@ function metaToComponent(meta, props) {
             }
         }
         else {
-            return propsFromMeta
+            return parseMetaProps(meta, props)
         }
-    }
-    else if (typeof meta == 'string' && meta.indexOf('app:') != -1) {
-        return meta
     }
     else {
         return meta

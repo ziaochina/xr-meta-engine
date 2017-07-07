@@ -16,7 +16,8 @@ class reducer {
 			form: {
 				user:'1',
 				password:'1'
-			}
+			},
+			details:[1,2,3,4]
 		}
 
 		return this.metaReducer.init(state, {data})

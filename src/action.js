@@ -63,8 +63,11 @@ class action {
 		const reg = new RegExp(/\{\{([^{}]+)\}\}/)
 
 		if(meta.name && meta.component){
-			meta.path = path 
+			meta.path = vars ? `${path}, ${vars.join(',')}` : path
 		}
+
+		if(meta["_power"])
+			return
 
 		Object.keys(meta).forEach(key => {
 			let v = meta[key],
@@ -126,7 +129,8 @@ class action {
 			rowIndex = parsedPath.vars ? parsedPath.vars[0] : undefined,
 			vars = parsedPath.vars,
 			data = util.getField(this.injections.getState()).toJS() 
-
+ 
+		meta['_power'] = undefined
 		this.updateMeta(meta, path, rowIndex, vars, data)
 		return meta
 	}
