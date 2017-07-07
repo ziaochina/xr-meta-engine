@@ -84,6 +84,7 @@ class action {
 				})
 
 				values = values.concat([currentPath, rowIndex, vars])
+
 				meta[key] = f.apply(this, values)
 			}
 			else if( v instanceof Array ){
@@ -212,10 +213,6 @@ class action {
 		const Modal = config.getModal()
 		if(!Modal || args.length == 0 || !Modal[args[0]]) return
 		return Modal[args[0]](...args.slice(1))
-	}
-
-	appLoader = (appName, ...args) =>{
-		return <AppLoader  {...args} name={appName} />
 	}
 
 	gm = this.getMeta

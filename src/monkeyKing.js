@@ -66,10 +66,10 @@ function metaToComponent(meta, props) {
 
             allProps = omit(allProps, ['clearAppState', 'component', 'name', 'getDirectFuns', 'initView', 'payload'])
 
-            if (allProps['_visible'] === false)
-                return null
-
-            if (typeof component == 'string' || component.prototype.isReactComponent) {
+            if(componentName == 'AppLoader'){
+                return React.createElement(component, {...allProps, name: allProps.appName})
+            }
+            else if (typeof component == 'string' || component.prototype.isReactComponent) {
                 return React.createElement(component, allProps)
             }
             else {
