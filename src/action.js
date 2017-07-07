@@ -84,8 +84,13 @@ class action {
 				})
 
 				values = values.concat([currentPath, rowIndex, vars])
+				let ret = f.apply(this, values)
 
-				meta[key] = f.apply(this, values)
+				if(key == '...' && ret && typeof ret == 'object'){
+					meta = {...meta, ...ret}
+				}else{
+					meta[key] = ret	
+				}
 			}
 			else if( v instanceof Array ){
 
