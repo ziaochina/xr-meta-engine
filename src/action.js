@@ -52,8 +52,8 @@ class action {
 
 		var body = "return " + v
 			.replace(reg, (word,group)=> group)
-			.replace(/\([ ]*\)/g, word=>`({path:_path, rowIndex:_rowIndex, vars: _vars})`)
-
+			//.replace(/\([ ]*\)/g, word=>`({path:_path, rowIndex:_rowIndex, vars: _vars})`)
+		
 		this.cache.expression[v] = new Function(...params, body)
 
 		return this.cache.expression[v]
@@ -80,7 +80,7 @@ class action {
 				let values = [data]
 
 				Object.keys(this.metaHandlers).forEach(k=>{
-					values.push(this.metaHandlers[k])
+					values.push((...args) => this.metaHandlers[k](...args, {currentPath, rowIndex, vars}) )
 				})
 
 				values = values.concat([currentPath, rowIndex, vars])
