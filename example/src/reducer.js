@@ -17,7 +17,12 @@ class reducer {
 				user:'1',
 				password:'1'
 			},
-			details:[1,2,3,4]
+			details:[1,2,3,4],
+			ps:{
+				a:'a',
+				b:1
+
+			}
 		}
 
 		return this.metaReducer.init(state, {data})

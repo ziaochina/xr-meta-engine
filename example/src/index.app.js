@@ -71,7 +71,9 @@ function getMeta() {
 			name: 'span',
 			component: '::span',
 			children: "{{data.details[_rowIndex]}}",
-			_power: 'for in data.details'
+
+			_power: 'for in data.details',
+			'...': '{{data.ps}}'
 		}]
 
 	}

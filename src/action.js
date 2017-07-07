@@ -85,9 +85,11 @@ class action {
 
 				values = values.concat([currentPath, rowIndex, vars])
 				let ret = f.apply(this, values)
-
 				if(key == '...' && ret && typeof ret == 'object'){
-					meta = {...meta, ...ret}
+					Object.keys(ret).forEach(kk=>{
+						meta[kk] = ret[kk]
+					})
+					delete meta['...']
 				}else{
 					meta[key] = ret	
 				}
