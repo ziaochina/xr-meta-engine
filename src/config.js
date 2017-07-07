@@ -1,5 +1,6 @@
 import {
-	config as appLoaderConfig
+	config as appLoaderConfig,
+	AppLoader
 } from 'xr-app-loader'
 
 import cf from './componentFactory'
@@ -15,8 +16,11 @@ function config(option) {
 
 	appLoaderConfig(option)
 
+	cf.registerComponent('AppLoader', AppLoader)
+
 	if (!components || components.length == 0)
 		return
+
 
 	components.forEach(c => {
 		if (c.appName)
