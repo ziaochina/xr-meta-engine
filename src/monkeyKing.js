@@ -35,7 +35,7 @@ function metaToComponent(meta, props) {
     if(!meta){
         return meta
     }
-    else if (typeof meta == 'object' && meta.prototype && meta.prototype.isReactComponent) {
+    else if (typeof meta == 'object' && meta['$$typeof']) {
         return meta
     }
     else if (typeof meta == 'object' ) {
