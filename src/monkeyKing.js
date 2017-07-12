@@ -35,7 +35,7 @@ function metaToComponent(meta, props) {
     if (typeof meta == 'object' && meta.prototype && meta.prototype.isReactComponent) {
         return meta
     }
-    else if (typeof meta == 'object' && !meta.prototype.isReactComponent) {
+    else if (typeof meta == 'object' ) {
 
         if (meta.component) {
             if (meta['_visible'] === false)
