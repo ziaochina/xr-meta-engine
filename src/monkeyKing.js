@@ -32,7 +32,10 @@ function parseMetaProps(meta, props) {
 }
 
 function metaToComponent(meta, props) {
-    if (typeof meta == 'object' && !meta.prototype.isReactComponent) {
+    if (typeof meta == 'object' && meta.prototype && meta.prototype.isReactComponent) {
+        return meta
+    }
+    else if (typeof meta == 'object' && !meta.prototype.isReactComponent) {
 
         if (meta.component) {
             if (meta['_visible'] === false)
