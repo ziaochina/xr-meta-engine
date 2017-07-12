@@ -71,12 +71,12 @@ function metaToComponent(meta, props) {
                     return null
                 return React.createElement(component, {...allProps, name: allProps.appName})
             }
-            else if (typeof component == 'string' || component.prototype.isReactComponent) {
+            //else if (typeof component == 'string' || component.prototype.isReactComponent) {
                 return React.createElement(component, allProps)
-            }
-            else {
-                return component(allProps)
-            }
+            //}
+            //else {
+            //    return component(allProps)
+            //}
         }
         else {
             return parseMetaProps(meta, props)
