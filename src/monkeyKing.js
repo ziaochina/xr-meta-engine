@@ -65,9 +65,10 @@ function metaToComponent(meta, props) {
                 component = componentFactory.getComponent(props.appName, componentName)
 
             var allProps = {
+                key: meta.path,
                 ...props,
                 ...parseMetaProps(meta, props),
-                key: meta.path
+                
             }
 
             allProps = omit(allProps, ['clearAppState', 'component', 'name', 'getDirectFuns', 'initView', 'payload'])
