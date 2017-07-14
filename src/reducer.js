@@ -80,5 +80,5 @@ class reducer {
 }
 
 export default function creator(option) {
-	return new action(option)
+	return new reducer(option)
 }
