@@ -2,6 +2,7 @@ import React from 'react'
 import {AppLoader} from 'xr-app-loader'
 import * as util from './util'
 import {fromJS} from 'immutable'
+import contextManager from './context'
 import config from './config'
 
 class action {
@@ -225,6 +226,8 @@ class action {
 	gm = this.getMeta
 
 	gf = this.getField
+
+	context = contextManager
 }
 
 export default function creator(option) {

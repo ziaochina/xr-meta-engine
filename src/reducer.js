@@ -3,6 +3,8 @@ import Immutable, {
 	List
 } from 'immutable'
 
+import contextManager from './context'
+
 import * as util from './util'
 
 class reducer {
@@ -11,7 +13,7 @@ class reducer {
 		this.onEvent = this.onEvent.bind(this)
 	}
 
-	init(state, option){
+	init = (state, option) => {
 		const {
 			data = {},
 		} = option
@@ -21,7 +23,7 @@ class reducer {
 		})
 	}
 
-	initByImmutable(state, option) {
+	initByImmutable = (state, option) => {
 		const {
 			data,
 		} = option
@@ -42,7 +44,7 @@ class reducer {
 			.set('data', data)
 	}
 
-	onEvent(state, eventName, option) {
+	onEvent = (state, eventName, option) => {
 		const { path } = option
 		
 		const fieldPath  = util.getMeta(this.appInfo, path, 'bindField')
@@ -57,28 +59,26 @@ class reducer {
 		}
 	}
 
-	focus(state, path) {
+	focus = (state, path) => {
 		return util.setter(state, 'meta', 'focusField', path)
 	}
 
-	getPublishMethods(){
-		return {
-			init:this.init,
-			initByImmutable:this.initByImmutable,
-			onEvent:this.onEvent,
-			getMeta:util.getMeta,
-			getField:util.getField,
-			setField:util.setField,
-			getPublishMethods: this.getPublishMethods,
-			gm:util.getMeta,
-			gf:util.getField,
-			sf:util.setField
-		}
-	}
+	getMeta = util.getMeta
+
+	getField = util.getField
+
+	setField = util.setField
+
+	gm = util.getMeta
+
+	gf = util.getField
+
+	sf = util.setField
+
+	context = contextManager
 
 }
 
-
 export default function creator(option) {
-	return new reducer(option).getPublishMethods()
+	return new action(option)
 }
