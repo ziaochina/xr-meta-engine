@@ -227,6 +227,8 @@ class action {
 
 	gf = this.getField
 
+	sf = this.setField
+
 	context = contextManager
 }
 
